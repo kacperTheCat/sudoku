@@ -23,6 +23,11 @@ export default defineConfig({
         theme_color: '#6d28d9',
         background_color: '#14151a',
         display: 'standalone',
+        // Honored by Android when installed standalone. iOS Safari/PWA has
+        // no orientation-lock API at all, so the CSS landscape overlay in
+        // index.css is the real fallback there (and for any non-installed
+        // browser tab, where this hint is ignored everywhere).
+        orientation: 'portrait',
         start_url: '.',
         scope: '.',
         icons: [

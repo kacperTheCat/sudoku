@@ -605,3 +605,33 @@ h2 {
     transform: rotate(360deg);
   }
 }
+
+/*
+ * Portrait lock. manifest.json's "orientation": "portrait" handles this
+ * properly when installed standalone on Android, but iOS has no
+ * orientation-lock API at all and a plain browser tab can't be locked
+ * either — so this CSS fallback hides the app and shows a "rotate back"
+ * message whenever the viewport is landscape AND short enough to be a
+ * phone/tablet (not a wide desktop window, which is landscape by nature).
+ */
+#landscape-lock {
+  display: none;
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  #root {
+    display: none;
+  }
+
+  #landscape-lock {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100svh;
+    padding: 24px;
+    text-align: center;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 18px;
+  }
+}
