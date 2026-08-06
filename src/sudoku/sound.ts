@@ -45,7 +45,16 @@ function noiseClick(duration: number, peakGain: number, filterFreq: number) {
   const filter = audio.createBiquadFilter();
   filter.type = 'lowpass';
   filter.frequency.value = filterFreq;
-  filter.Q.value = 0.3;
+  filter.Q.value = 0.4;
+
+  // A touch of compression to give the transient more density/punch instead
+  // of just sounding louder.
+  const compressor = audio.createDynamicsCompressor();
+  compressor.threshold.value = -24;
+  compressor.knee.value = 12;
+  compressor.ratio.value = 6;
+  compressor.attack.value = 0.001;
+  compressor.release.value = 0.05;
 
   const gain = audio.createGain();
   const t0 = audio.currentTime;
@@ -53,7 +62,8 @@ function noiseClick(duration: number, peakGain: number, filterFreq: number) {
   gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration);
 
   source.connect(filter);
-  filter.connect(gain);
+  filter.connect(compressor);
+  compressor.connect(gain);
   gain.connect(audio.destination);
   source.start(t0);
   source.stop(t0 + duration + 0.01);
@@ -61,7 +71,8 @@ function noiseClick(duration: number, peakGain: number, filterFreq: number) {
 
 /** Soft, muted tap feedback for everyday UI interaction — a gentle "click", not a beep. */
 export function playClick(): void {
-  noiseClick(0.014, 0.05, 650);
+  // +7dB and a slightly higher cutoff than the original 650Hz/0.05 gain.
+  noiseClick(0.014, 0.11, 900);
 }
 
 /**
