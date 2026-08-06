@@ -61,7 +61,9 @@ function noiseClick(duration: number, peakGain: number, filterFreq: number) {
 
 /** Soft, muted tap feedback for everyday UI interaction — a gentle "click", not a beep. */
 export function playClick(): void {
-  noiseClick(0.014, 0.64, 900);
+  // Single voice, no layering — safe to push close to the destination's
+  // ±1.0 clipping ceiling.
+  noiseClick(0.014, 0.9, 900);
 }
 
 /**
@@ -74,7 +76,10 @@ export function playClick(): void {
 export function playScreenChange(): void {
   const audio = getContext();
   if (!audio) return;
-  const peakGain = 0.18;
+  // Noise + tone start simultaneously, so their peaks briefly sum
+  // (noiseGain is 0.6x this): keep peakGain low enough that 1.6x stays
+  // under ~0.95 to avoid audible clipping at that instant.
+  const peakGain = 0.55;
   const frequency = 380;
   const decay = 0.05;
   const t0 = audio.currentTime;
@@ -112,22 +117,28 @@ export function playScreenChange(): void {
   osc.stop(t0 + decay + 0.01);
 }
 
+// Each note's gain ramps exponentially down to 0.0001 over its own
+// duration, so by the time the next staggered note starts it has already
+// decayed to a small fraction of its peak — true simultaneous summing is
+// brief and small, which is why these individual peaks can sit this high
+// without the layered result clipping.
+
 /** Subtle rising chime for a correctly placed digit. */
 export function playCorrect(): void {
-  tone(660, 0, 0.09, 0.24, 'sine');
-  tone(880, 0.06, 0.12, 0.22, 'sine');
+  tone(660, 0, 0.09, 0.85, 'sine');
+  tone(880, 0.06, 0.12, 0.8, 'sine');
 }
 
 /** Subtle but sharper buzz for an incorrectly placed digit. */
 export function playIncorrect(): void {
-  tone(240, 0, 0.11, 0.28, 'sawtooth');
-  tone(180, 0.05, 0.13, 0.2, 'sawtooth');
+  tone(240, 0, 0.11, 0.85, 'sawtooth');
+  tone(180, 0.05, 0.13, 0.75, 'sawtooth');
 }
 
 /** Longer rising arpeggio played once the whole puzzle is solved. */
 export function playSuccess(): void {
-  tone(523, 0, 0.16, 0.28, 'sine');
-  tone(659, 0.11, 0.16, 0.28, 'sine');
-  tone(784, 0.22, 0.16, 0.28, 'sine');
-  tone(1046, 0.33, 0.32, 0.32, 'sine');
+  tone(523, 0, 0.16, 0.8, 'sine');
+  tone(659, 0.11, 0.16, 0.8, 'sine');
+  tone(784, 0.22, 0.16, 0.8, 'sine');
+  tone(1046, 0.33, 0.32, 0.85, 'sine');
 }
