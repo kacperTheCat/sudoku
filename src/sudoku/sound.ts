@@ -61,7 +61,7 @@ function noiseClick(duration: number, peakGain: number, filterFreq: number) {
 
 /** Soft, muted tap feedback for everyday UI interaction — a gentle "click", not a beep. */
 export function playClick(): void {
-  noiseClick(0.014, 0.16, 900);
+  noiseClick(0.014, 0.64, 900);
 }
 
 /**
@@ -74,7 +74,7 @@ export function playClick(): void {
 export function playScreenChange(): void {
   const audio = getContext();
   if (!audio) return;
-  const peakGain = 0.045;
+  const peakGain = 0.18;
   const frequency = 380;
   const decay = 0.05;
   const t0 = audio.currentTime;
@@ -114,20 +114,20 @@ export function playScreenChange(): void {
 
 /** Subtle rising chime for a correctly placed digit. */
 export function playCorrect(): void {
-  tone(660, 0, 0.09, 0.06, 'sine');
-  tone(880, 0.06, 0.12, 0.055, 'sine');
+  tone(660, 0, 0.09, 0.24, 'sine');
+  tone(880, 0.06, 0.12, 0.22, 'sine');
 }
 
 /** Subtle but sharper buzz for an incorrectly placed digit. */
 export function playIncorrect(): void {
-  tone(240, 0, 0.11, 0.07, 'sawtooth');
-  tone(180, 0.05, 0.13, 0.05, 'sawtooth');
+  tone(240, 0, 0.11, 0.28, 'sawtooth');
+  tone(180, 0.05, 0.13, 0.2, 'sawtooth');
 }
 
 /** Longer rising arpeggio played once the whole puzzle is solved. */
 export function playSuccess(): void {
-  tone(523, 0, 0.16, 0.07, 'sine');
-  tone(659, 0.11, 0.16, 0.07, 'sine');
-  tone(784, 0.22, 0.16, 0.07, 'sine');
-  tone(1046, 0.33, 0.32, 0.08, 'sine');
+  tone(523, 0, 0.16, 0.28, 'sine');
+  tone(659, 0.11, 0.16, 0.28, 'sine');
+  tone(784, 0.22, 0.16, 0.28, 'sine');
+  tone(1046, 0.33, 0.32, 0.32, 'sine');
 }
