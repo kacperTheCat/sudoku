@@ -1,8 +1,11 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import type { Difficulty, GameState, Settings } from '../sudoku/types';
 import { generatePuzzle } from '../sudoku/generator';
+import { PEERS } from '../sudoku/solver';
 import { loadGame, saveGame, loadSettings, saveSettings } from './storage';
 import { playCorrect, playIncorrect, playSuccess } from '../sudoku/sound';
+
+const CONFLICT_PULSE_MS = 450;
 
 const CELL_COUNT = 81;
 
@@ -42,6 +45,14 @@ export function useGame() {
   const [game, setGame] = useState<GameState | null>(() => loadGame());
   const [settings, setSettings] = useState<Settings>(() => loadSettings());
   const [isGenerating, setIsGenerating] = useState(false);
+  const [pulseCells, setPulseCells] = useState<number[]>([]);
+  const pulseTimeoutRef = useRef<number | undefined>(undefined);
+
+  useEffect(() => {
+    return () => {
+      if (pulseTimeoutRef.current) window.clearTimeout(pulseTimeoutRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     if (game) saveGame(game);
@@ -118,10 +129,23 @@ export function useGame() {
       }));
       setGame(next);
 
-      if (settings.colorAssists && next !== game && next.values[index] !== 0) {
-        if (next.isComplete) playSuccess();
-        else if (next.values[index] === next.solution[index]) playCorrect();
-        else playIncorrect();
+      if (next !== game && next.values[index] !== 0) {
+        // Duplicate-in-row/column/box check is independent of the
+        // colorAssists setting (and of whether the digit matches the
+        // solution) — it's flagging a plain rule violation between two
+        // visible cells, not revealing the answer.
+        const duplicatePeers = PEERS[index].filter((p) => next.values[p] === next.values[index]);
+        if (duplicatePeers.length > 0) {
+          if (pulseTimeoutRef.current) window.clearTimeout(pulseTimeoutRef.current);
+          setPulseCells([index, ...duplicatePeers]);
+          pulseTimeoutRef.current = window.setTimeout(() => setPulseCells([]), CONFLICT_PULSE_MS);
+        }
+
+        if (settings.colorAssists) {
+          if (next.isComplete) playSuccess();
+          else if (next.values[index] === next.solution[index]) playCorrect();
+          else playIncorrect();
+        }
       }
     },
     [game, settings.colorAssists],
@@ -166,6 +190,7 @@ export function useGame() {
     game,
     settings,
     isGenerating,
+    pulseCells,
     newGame,
     selectCell,
     setDigit,

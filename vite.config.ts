@@ -11,6 +11,10 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      // Registration is done manually via the virtual:pwa-register/react
+      // hook (useAppUpdate) so we can show our own overlay before reloading,
+      // instead of the plugin's silent auto-injected script.
+      injectRegister: null,
       includeAssets: ['favicon.ico', 'apple-touch-icon-180x180.png', 'icon-source.svg'],
       manifest: {
         name: 'Sudoku',

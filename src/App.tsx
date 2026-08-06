@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useGame } from './state/useGame';
 import { useInstallPrompt } from './pwa/useInstallPrompt';
+import { useAppUpdate } from './pwa/useAppUpdate';
 import { MenuScreen } from './components/MenuScreen';
 import { GameScreen } from './components/GameScreen';
 import { InstallPrompt } from './components/InstallPrompt';
+import { UpdateOverlay } from './components/UpdateOverlay';
 import type { Difficulty } from './sudoku/types';
 import { playClick, playScreenChange } from './sudoku/sound';
 
@@ -14,6 +16,7 @@ function App() {
     game,
     settings,
     isGenerating,
+    pulseCells,
     newGame,
     selectCell,
     setDigit,
@@ -26,6 +29,7 @@ function App() {
 
   const [view, setView] = useState<View>(() => (game ? 'game' : 'menu'));
   const installPrompt = useInstallPrompt();
+  const { updating } = useAppUpdate();
 
   // Delegated so every button in the app (board cells, menu, dialogs) gets a
   // light tap sound without wiring it into each handler. Buttons that already
@@ -63,6 +67,7 @@ function App() {
           game={game}
           settings={settings}
           isGenerating={isGenerating}
+          pulseCells={pulseCells}
           onSelect={selectCell}
           onDigit={setDigit}
           onErase={erase}
@@ -82,6 +87,8 @@ function App() {
         onInstall={installPrompt.install}
         onDismiss={installPrompt.dismiss}
       />
+
+      <UpdateOverlay visible={updating} />
     </div>
   );
 }

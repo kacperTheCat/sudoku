@@ -9,10 +9,11 @@ interface BoardProps {
   notes: number[][];
   selected: number | null;
   cellStatus: CellStatus[];
+  pulseCells: number[];
   onSelect: (index: number) => void;
 }
 
-export function Board({ values, givens, notes, selected, cellStatus, onSelect }: BoardProps) {
+export function Board({ values, givens, notes, selected, cellStatus, pulseCells, onSelect }: BoardProps) {
   const selectedRow = selected !== null ? rowOf(selected) : -1;
   const selectedCol = selected !== null ? colOf(selected) : -1;
   const selectedBox = selected !== null ? boxOf(selected) : -1;
@@ -38,6 +39,7 @@ export function Board({ values, givens, notes, selected, cellStatus, onSelect }:
             isPeer={isPeer}
             isSameValue={isSameValue}
             status={cellStatus[index]}
+            isPulsing={pulseCells.includes(index)}
             rightEdge={colOf(index) === 2 || colOf(index) === 5}
             bottomEdge={rowOf(index) === 2 || rowOf(index) === 5}
             onSelect={() => onSelect(index)}

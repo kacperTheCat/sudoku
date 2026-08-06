@@ -73,7 +73,7 @@ export function NumberPad({
           className={`number-pad__tool${colorAssists ? ' number-pad__tool--active' : ''}`}
           onClick={onToggleColorAssists}
         >
-          Kolory
+          Podpowiedzi
         </button>
       </div>
     </div>

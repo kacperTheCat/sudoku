@@ -10,6 +10,7 @@ interface GameScreenProps {
   game: GameState | null;
   settings: Settings;
   isGenerating: boolean;
+  pulseCells: number[];
   onSelect: (index: number) => void;
   onDigit: (digit: number) => void;
   onErase: () => void;
@@ -25,6 +26,7 @@ export function GameScreen({
   game,
   settings,
   isGenerating,
+  pulseCells,
   onSelect,
   onDigit,
   onErase,
@@ -83,6 +85,7 @@ export function GameScreen({
           notes={game.notes}
           selected={game.selected}
           cellStatus={cellStatus}
+          pulseCells={pulseCells}
           onSelect={onSelect}
         />
 

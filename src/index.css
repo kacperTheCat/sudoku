@@ -16,6 +16,7 @@
   --correct: #15803d;
   --incorrect: #dc2626;
   --incorrect-bg: rgba(220, 38, 38, 0.12);
+  --pulse: #ec4899;
   --shadow: 0 8px 24px rgba(20, 20, 30, 0.08);
   font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
 }
@@ -38,6 +39,7 @@
     --correct: #4ade80;
     --incorrect: #f87171;
     --incorrect-bg: rgba(248, 113, 113, 0.18);
+    --pulse: #f9a8d4;
     --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
   }
 }
@@ -86,8 +88,8 @@ h2 {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 16px;
-  gap: 16px;
+  padding: 12px 6px;
+  gap: 14px;
 }
 
 .screen--loading {
@@ -261,7 +263,7 @@ h2 {
   justify-content: center;
   padding: 0;
   cursor: pointer;
-  font-size: clamp(16px, 4.2vw, 26px);
+  font-size: clamp(18px, 5.2vw, 32px);
   line-height: 1;
   position: relative;
 }
@@ -307,6 +309,24 @@ h2 {
   background: var(--selected-bg);
 }
 
+.cell__value--pulse {
+  display: inline-block;
+  animation: cell-pulse 0.45s ease-out;
+}
+
+@keyframes cell-pulse {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.35);
+    color: var(--pulse);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 .cell__notes {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -317,7 +337,7 @@ h2 {
 }
 
 .cell__note {
-  font-size: clamp(7px, 1.6vw, 10px);
+  font-size: clamp(8px, 1.9vw, 12px);
   color: var(--text-muted);
   display: flex;
   align-items: center;
@@ -347,7 +367,7 @@ h2 {
   background: var(--surface);
   color: var(--text);
   border-radius: 10px;
-  font-size: clamp(16px, 4vw, 20px);
+  font-size: clamp(18px, 4.6vw, 24px);
   font-weight: 600;
   cursor: pointer;
 }
@@ -392,8 +412,8 @@ h2 {
   background: var(--surface);
   color: var(--text);
   border-radius: 10px;
-  padding: 8px 2px;
-  font-size: 11.5px;
+  padding: 10px 2px;
+  font-size: 12.5px;
   font-weight: 500;
   cursor: pointer;
 }
@@ -484,4 +504,31 @@ h2 {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+/* Update overlay */
+
+.update-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 30;
+}
+
+.update-spinner {
+  width: 42px;
+  height: 42px;
+  border: 4px solid rgba(255, 255, 255, 0.25);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: update-spin 0.8s linear infinite;
+}
+
+@keyframes update-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

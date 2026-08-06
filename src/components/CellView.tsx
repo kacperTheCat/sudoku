@@ -6,6 +6,7 @@ interface CellViewProps {
   isPeer: boolean;
   isSameValue: boolean;
   status: 'correct' | 'incorrect' | undefined;
+  isPulsing: boolean;
   rightEdge: boolean;
   bottomEdge: boolean;
   onSelect: () => void;
@@ -19,6 +20,7 @@ export function CellView({
   isPeer,
   isSameValue,
   status,
+  isPulsing,
   rightEdge,
   bottomEdge,
   onSelect,
@@ -46,7 +48,7 @@ export function CellView({
   return (
     <button type="button" className={classes} onClick={onSelect}>
       {value !== 0 ? (
-        <span className="cell__value">{value}</span>
+        <span className={`cell__value${isPulsing ? ' cell__value--pulse' : ''}`}>{value}</span>
       ) : notes.length > 0 ? (
         <span className="cell__notes">
           {Array.from({ length: 9 }, (_, i) => i + 1).map((n) => (
