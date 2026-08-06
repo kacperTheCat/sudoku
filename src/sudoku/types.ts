@@ -27,3 +27,10 @@ export interface Settings {
   colorAssists: boolean;
   theme: Theme;
 }
+
+export interface DifficultyStats {
+  gamesCompleted: number;
+  totalSeconds: number;
+}
+
+export type Stats = Record<Difficulty, DifficultyStats>;

@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import type { Difficulty, GameState, Settings } from '../sudoku/types';
+import type { Difficulty, GameState, Settings, Stats } from '../sudoku/types';
 import { generatePuzzle } from '../sudoku/generator';
 import { PEERS } from '../sudoku/solver';
-import { loadGame, saveGame, loadSettings, saveSettings } from './storage';
+import { loadGame, saveGame, loadSettings, saveSettings, loadStats, saveStats } from './storage';
 import { playCorrect, playIncorrect, playSuccess } from '../sudoku/sound';
 
 const CONFLICT_PULSE_MS = 450;
@@ -44,6 +44,7 @@ function applyCellChange(
 export function useGame() {
   const [game, setGame] = useState<GameState | null>(() => loadGame());
   const [settings, setSettings] = useState<Settings>(() => loadSettings());
+  const [stats, setStats] = useState<Stats>(() => loadStats());
   const [isGenerating, setIsGenerating] = useState(false);
   const [pulseCells, setPulseCells] = useState<number[]>([]);
   const pulseTimeoutRef = useRef<number | undefined>(undefined);
@@ -61,6 +62,10 @@ export function useGame() {
   useEffect(() => {
     saveSettings(settings);
   }, [settings]);
+
+  useEffect(() => {
+    saveStats(stats);
+  }, [stats]);
 
   // index.html has an inline script setting this attribute before first
   // paint (avoiding a flash of the wrong theme); this effect keeps it in
@@ -147,9 +152,22 @@ export function useGame() {
         }
 
         // The win fanfare always plays — it's a one-time celebration, not a
-        // per-digit hint, so it shouldn't be silenced by Podpowiedzi.
-        if (next.isComplete) playSuccess();
-        else if (settings.colorAssists) {
+        // per-digit hint, so it shouldn't be silenced by Podpowiedzi. This
+        // branch only runs once per completion: setDigit early-returns
+        // whenever game.isComplete is already true.
+        if (next.isComplete) {
+          playSuccess();
+          setStats((s) => {
+            const prev = s[next.difficulty];
+            return {
+              ...s,
+              [next.difficulty]: {
+                gamesCompleted: prev.gamesCompleted + 1,
+                totalSeconds: prev.totalSeconds + next.elapsedSeconds,
+              },
+            };
+          });
+        } else if (settings.colorAssists) {
           if (next.values[index] === next.solution[index]) playCorrect();
           else playIncorrect();
         }
@@ -200,6 +218,7 @@ export function useGame() {
   return {
     game,
     settings,
+    stats,
     isGenerating,
     pulseCells,
     newGame,

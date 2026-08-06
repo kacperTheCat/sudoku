@@ -15,6 +15,7 @@ function App() {
   const {
     game,
     settings,
+    stats,
     isGenerating,
     pulseCells,
     newGame,
@@ -61,6 +62,7 @@ function App() {
           savedGame={game}
           isGenerating={isGenerating}
           theme={settings.theme}
+          stats={stats}
           onSelectDifficulty={handleSelectDifficulty}
           onContinue={() => setView('game')}
           onToggleTheme={toggleTheme}

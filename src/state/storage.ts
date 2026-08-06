@@ -1,7 +1,8 @@
-import type { GameState, Settings } from '../sudoku/types';
+import type { GameState, Settings, Stats } from '../sudoku/types';
 
 const GAME_KEY = 'sudoku:v1:game';
 const SETTINGS_KEY = 'sudoku:v1:settings';
+const STATS_KEY = 'sudoku:v1:stats';
 
 export function loadGame(): GameState | null {
   try {
@@ -51,6 +52,29 @@ export function loadSettings(): Settings {
 export function saveSettings(settings: Settings): void {
   try {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  } catch {
+    // ignore
+  }
+}
+
+function defaultStats(): Stats {
+  const empty = { gamesCompleted: 0, totalSeconds: 0 };
+  return { easy: { ...empty }, medium: { ...empty }, hard: { ...empty }, expert: { ...empty } };
+}
+
+export function loadStats(): Stats {
+  try {
+    const raw = localStorage.getItem(STATS_KEY);
+    if (!raw) return defaultStats();
+    return { ...defaultStats(), ...(JSON.parse(raw) as Partial<Stats>) };
+  } catch {
+    return defaultStats();
+  }
+}
+
+export function saveStats(stats: Stats): void {
+  try {
+    localStorage.setItem(STATS_KEY, JSON.stringify(stats));
   } catch {
     // ignore
   }

@@ -1,5 +1,5 @@
 import { DIFFICULTY_CLUES, DIFFICULTY_LABELS } from '../sudoku/generator';
-import type { Difficulty, GameState, Theme } from '../sudoku/types';
+import type { Difficulty, GameState, Stats, Theme } from '../sudoku/types';
 import { ThemeToggle } from './ThemeToggle';
 
 const DIFFICULTIES: Difficulty[] = ['easy', 'medium', 'hard', 'expert'];
@@ -10,10 +10,16 @@ function formatTime(totalSeconds: number): string {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
 
+function formatAverage(stat: { gamesCompleted: number; totalSeconds: number }): string {
+  if (stat.gamesCompleted === 0) return '—';
+  return formatTime(Math.round(stat.totalSeconds / stat.gamesCompleted));
+}
+
 interface MenuScreenProps {
   savedGame: GameState | null;
   isGenerating: boolean;
   theme: Theme;
+  stats: Stats;
   onSelectDifficulty: (difficulty: Difficulty) => void;
   onContinue: () => void;
   onToggleTheme: () => void;
@@ -23,6 +29,7 @@ export function MenuScreen({
   savedGame,
   isGenerating,
   theme,
+  stats,
   onSelectDifficulty,
   onContinue,
   onToggleTheme,
@@ -69,6 +76,17 @@ export function MenuScreen({
       </div>
 
       {isGenerating && <p className="menu-screen__generating">Generowanie planszy…</p>}
+
+      <p className="menu-screen__prompt">Statystyki</p>
+      <div className="stats-grid">
+        {DIFFICULTIES.map((difficulty) => (
+          <div key={difficulty} className="stats-grid__item">
+            <span className="stats-grid__label">{DIFFICULTY_LABELS[difficulty]}</span>
+            <span className="stats-grid__value">{stats[difficulty].gamesCompleted} gier</span>
+            <span className="stats-grid__value">śr. {formatAverage(stats[difficulty])}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

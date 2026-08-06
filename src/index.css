@@ -223,6 +223,33 @@ h2 {
   opacity: 0.85;
 }
 
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.stats-grid__item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.stats-grid__label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.stats-grid__value {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
 .menu-screen__generating {
   text-align: center;
   color: var(--text-muted);
