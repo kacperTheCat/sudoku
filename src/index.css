@@ -329,7 +329,7 @@ h2 {
   justify-content: center;
   padding: 0;
   cursor: pointer;
-  font-size: clamp(18px, 5.2vw, 32px);
+  font-size: clamp(20px, 6.2vw, 38px);
   line-height: 1;
   position: relative;
 }
@@ -403,7 +403,7 @@ h2 {
 }
 
 .cell__note {
-  font-size: clamp(8px, 1.9vw, 12px);
+  font-size: clamp(9px, 2.2vw, 14px);
   color: var(--text-muted);
   display: flex;
   align-items: center;
@@ -433,7 +433,7 @@ h2 {
   background: var(--surface);
   color: var(--text);
   border-radius: 10px;
-  font-size: clamp(18px, 4.6vw, 24px);
+  font-size: clamp(20px, 5.4vw, 28px);
   font-weight: 600;
   cursor: pointer;
 }
