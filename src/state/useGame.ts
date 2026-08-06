@@ -62,6 +62,13 @@ export function useGame() {
     saveSettings(settings);
   }, [settings]);
 
+  // index.html has an inline script setting this attribute before first
+  // paint (avoiding a flash of the wrong theme); this effect keeps it in
+  // sync for changes made after load, e.g. tapping the theme toggle.
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', settings.theme);
+  }, [settings.theme]);
+
   // Elapsed-time ticker, paused once the puzzle is solved.
   useEffect(() => {
     if (!game || game.isComplete) return;
@@ -186,6 +193,10 @@ export function useGame() {
     setSettings((s) => ({ ...s, colorAssists: !s.colorAssists }));
   }, []);
 
+  const toggleTheme = useCallback(() => {
+    setSettings((s) => ({ ...s, theme: s.theme === 'dark' ? 'light' : 'dark' }));
+  }, []);
+
   return {
     game,
     settings,
@@ -199,5 +210,6 @@ export function useGame() {
     undo,
     toggleShowRemaining,
     toggleColorAssists,
+    toggleTheme,
   };
 }

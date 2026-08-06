@@ -6,6 +6,7 @@ import { MenuScreen } from './components/MenuScreen';
 import { GameScreen } from './components/GameScreen';
 import { InstallPrompt } from './components/InstallPrompt';
 import { UpdateOverlay } from './components/UpdateOverlay';
+import { ThemeToggle } from './components/ThemeToggle';
 import type { Difficulty } from './sudoku/types';
 import { playClick, playScreenChange } from './sudoku/sound';
 
@@ -25,6 +26,7 @@ function App() {
     undo,
     toggleShowRemaining,
     toggleColorAssists,
+    toggleTheme,
   } = useGame();
 
   const [view, setView] = useState<View>(() => (game ? 'game' : 'menu'));
@@ -89,6 +91,8 @@ function App() {
       />
 
       <UpdateOverlay visible={updating} />
+
+      <ThemeToggle theme={settings.theme} onToggle={toggleTheme} />
     </div>
   );
 }

@@ -29,15 +29,22 @@ export function clearGame(): void {
   }
 }
 
-const DEFAULT_SETTINGS: Settings = { showRemaining: true, colorAssists: true };
+function systemTheme(): Settings['theme'] {
+  if (typeof window === 'undefined' || !window.matchMedia) return 'light';
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function defaultSettings(): Settings {
+  return { showRemaining: true, colorAssists: true, theme: systemTheme() };
+}
 
 export function loadSettings(): Settings {
   try {
     const raw = localStorage.getItem(SETTINGS_KEY);
-    if (!raw) return DEFAULT_SETTINGS;
-    return { ...DEFAULT_SETTINGS, ...(JSON.parse(raw) as Partial<Settings>) };
+    if (!raw) return defaultSettings();
+    return { ...defaultSettings(), ...(JSON.parse(raw) as Partial<Settings>) };
   } catch {
-    return DEFAULT_SETTINGS;
+    return defaultSettings();
   }
 }
 

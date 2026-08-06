@@ -21,8 +21,15 @@
   font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
 }
 
+/*
+ * The inline script in index.html sets data-theme before first paint, so in
+ * practice this media query only ever matters for that first frame (or if
+ * JS fails). :not([data-theme="light"]) means an explicit light choice
+ * always wins over the system preference; :root[data-theme="dark"] below
+ * makes an explicit dark choice win even when the system prefers light.
+ */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --bg: #14151a;
     --surface: #1e2028;
     --border: #33353f;
@@ -41,7 +48,30 @@
     --incorrect-bg: rgba(248, 113, 113, 0.18);
     --pulse: #f9a8d4;
     --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    color-scheme: dark;
   }
+}
+
+:root[data-theme='dark'] {
+  --bg: #14151a;
+  --surface: #1e2028;
+  --border: #33353f;
+  --border-strong: #565a68;
+  --text: #f2f2f5;
+  --text-muted: #9aa0ae;
+  --accent: #a78bfa;
+  --accent-contrast: #14151a;
+  --given: #f2f2f5;
+  --entered: #c4b5fd;
+  --peer-bg: rgba(167, 139, 250, 0.08);
+  --selected-bg: rgba(167, 139, 250, 0.24);
+  --same-value-bg: rgba(167, 139, 250, 0.14);
+  --correct: #4ade80;
+  --incorrect: #f87171;
+  --incorrect-bg: rgba(248, 113, 113, 0.18);
+  --pulse: #f9a8d4;
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  color-scheme: dark;
 }
 
 * {
@@ -80,6 +110,29 @@ h2 {
   align-items: center;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
     env(safe-area-inset-left);
+}
+
+.theme-toggle {
+  position: fixed;
+  top: calc(10px + env(safe-area-inset-top));
+  right: calc(10px + env(safe-area-inset-right));
+  z-index: 15;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+
+.theme-toggle:active {
+  transform: scale(0.94);
 }
 
 .screen {

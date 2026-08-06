@@ -2,6 +2,18 @@
 <html lang="pl">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      (function () {
+        try {
+          var raw = localStorage.getItem('sudoku:v1:settings');
+          var theme = raw ? JSON.parse(raw).theme : null;
+          if (theme !== 'light' && theme !== 'dark') {
+            theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          }
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {}
+      })();
+    </script>
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover"

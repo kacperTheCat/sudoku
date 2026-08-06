@@ -20,7 +20,10 @@ export interface GameState {
   startedAt: number;
 }
 
+export type Theme = 'light' | 'dark';
+
 export interface Settings {
   showRemaining: boolean;
   colorAssists: boolean;
+  theme: Theme;
 }
