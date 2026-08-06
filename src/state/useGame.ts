@@ -137,20 +137,20 @@ export function useGame() {
       setGame(next);
 
       if (next !== game && next.values[index] !== 0) {
-        // Duplicate-in-row/column/box check is independent of the
-        // colorAssists setting (and of whether the digit matches the
-        // solution) — it's flagging a plain rule violation between two
-        // visible cells, not revealing the answer.
-        const duplicatePeers = PEERS[index].filter((p) => next.values[p] === next.values[index]);
-        if (duplicatePeers.length > 0) {
-          if (pulseTimeoutRef.current) window.clearTimeout(pulseTimeoutRef.current);
-          setPulseCells([index, ...duplicatePeers]);
-          pulseTimeoutRef.current = window.setTimeout(() => setPulseCells([]), CONFLICT_PULSE_MS);
+        if (settings.colorAssists) {
+          const duplicatePeers = PEERS[index].filter((p) => next.values[p] === next.values[index]);
+          if (duplicatePeers.length > 0) {
+            if (pulseTimeoutRef.current) window.clearTimeout(pulseTimeoutRef.current);
+            setPulseCells([index, ...duplicatePeers]);
+            pulseTimeoutRef.current = window.setTimeout(() => setPulseCells([]), CONFLICT_PULSE_MS);
+          }
         }
 
-        if (settings.colorAssists) {
-          if (next.isComplete) playSuccess();
-          else if (next.values[index] === next.solution[index]) playCorrect();
+        // The win fanfare always plays — it's a one-time celebration, not a
+        // per-digit hint, so it shouldn't be silenced by Podpowiedzi.
+        if (next.isComplete) playSuccess();
+        else if (settings.colorAssists) {
+          if (next.values[index] === next.solution[index]) playCorrect();
           else playIncorrect();
         }
       }
