@@ -104,7 +104,9 @@ h2 {
 }
 
 .app {
-  min-height: 100svh;
+  /* Hard cap (not min-height) so the app never grows past the viewport —
+     children shrink to fit instead of the page scrolling. */
+  height: 100svh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -146,6 +148,7 @@ h2 {
   width: 100%;
   max-width: 520px;
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   padding: 8px 4px;
@@ -287,6 +290,7 @@ h2 {
 
 .game-screen__body {
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -314,6 +318,8 @@ h2 {
   grid-template-rows: repeat(9, 1fr);
   width: 100%;
   aspect-ratio: 1;
+  max-height: 100%;
+  margin-inline: auto;
   background: var(--surface);
   border: 2px solid var(--border-strong);
   border-radius: 12px;
@@ -416,6 +422,7 @@ h2 {
 .number-pad {
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   gap: 10px;
 }
 
