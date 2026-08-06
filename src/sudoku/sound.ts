@@ -27,9 +27,41 @@ function tone(frequency: number, startTime: number, duration: number, peakGain: 
   osc.stop(t0 + duration + 0.02);
 }
 
-/** Light, game-like tap feedback for any UI interaction. */
+/** Short filtered noise burst — a soft, physical-feeling "tock" rather than an electronic beep. */
+function noiseClick(duration: number, peakGain: number, filterFreq: number) {
+  const audio = getContext();
+  if (!audio) return;
+  const sampleCount = Math.max(1, Math.floor(audio.sampleRate * duration));
+  const buffer = audio.createBuffer(1, sampleCount, audio.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < sampleCount; i++) data[i] = Math.random() * 2 - 1;
+
+  const source = audio.createBufferSource();
+  source.buffer = buffer;
+
+  // Lowpass (not bandpass) so it dulls the highs into a soft "tock" instead
+  // of resonating a narrow band into an audible squeak/whistle. Low Q keeps
+  // the filter from ringing at the cutoff.
+  const filter = audio.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.value = filterFreq;
+  filter.Q.value = 0.3;
+
+  const gain = audio.createGain();
+  const t0 = audio.currentTime;
+  gain.gain.setValueAtTime(peakGain, t0);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration);
+
+  source.connect(filter);
+  filter.connect(gain);
+  gain.connect(audio.destination);
+  source.start(t0);
+  source.stop(t0 + duration + 0.01);
+}
+
+/** Soft, muted tap feedback for any UI interaction — a gentle "click", not a beep. */
 export function playClick(): void {
-  tone(1100, 0, 0.035, 0.045, 'square');
+  noiseClick(0.014, 0.05, 650);
 }
 
 /** Subtle rising chime for a correctly placed digit. */
