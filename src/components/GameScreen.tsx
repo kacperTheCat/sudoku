@@ -64,7 +64,12 @@ export function GameScreen({
   return (
     <div className="screen game-screen">
       <header className="game-screen__header">
-        <button type="button" className="button button--ghost" onClick={onBackToMenu}>
+        <button
+          type="button"
+          className="button button--ghost"
+          onClick={onBackToMenu}
+          data-sound="transition"
+        >
           ← Menu
         </button>
         <span className="game-screen__difficulty">{DIFFICULTY_LABELS[game.difficulty]}</span>

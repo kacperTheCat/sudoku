@@ -33,6 +33,7 @@ export function MenuScreen({
           type="button"
           className="button button--primary menu-screen__continue"
           onClick={onContinue}
+          data-sound="transition"
         >
           <span>Kontynuuj grę</span>
           <span className="menu-screen__continue-meta">
@@ -50,6 +51,7 @@ export function MenuScreen({
             className="button difficulty-button"
             disabled={isGenerating}
             onClick={() => onSelectDifficulty(difficulty)}
+            data-sound="transition"
           >
             <span className="difficulty-button__label">{DIFFICULTY_LABELS[difficulty]}</span>
             <span className="difficulty-button__clues">

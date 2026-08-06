@@ -23,10 +23,15 @@ export function WinDialog({ difficulty, seconds, onPlayAgain, onBackToMenu }: Wi
           Poziom: {DIFFICULTY_LABELS[difficulty]} · Czas: {formatTime(seconds)}
         </p>
         <div className="win-dialog__actions">
-          <button type="button" className="button button--primary" onClick={onPlayAgain}>
+          <button
+            type="button"
+            className="button button--primary"
+            onClick={onPlayAgain}
+            data-sound="transition"
+          >
             Kolejna łamigłówka
           </button>
-          <button type="button" className="button" onClick={onBackToMenu}>
+          <button type="button" className="button" onClick={onBackToMenu} data-sound="transition">
             Powrót do menu
           </button>
         </div>

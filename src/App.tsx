@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useGame } from './state/useGame';
+import { useInstallPrompt } from './pwa/useInstallPrompt';
 import { MenuScreen } from './components/MenuScreen';
 import { GameScreen } from './components/GameScreen';
+import { InstallPrompt } from './components/InstallPrompt';
 import type { Difficulty } from './sudoku/types';
-import { playClick } from './sudoku/sound';
+import { playClick, playScreenChange } from './sudoku/sound';
 
 type View = 'menu' | 'game';
 
@@ -23,16 +25,20 @@ function App() {
   } = useGame();
 
   const [view, setView] = useState<View>(() => (game ? 'game' : 'menu'));
+  const installPrompt = useInstallPrompt();
 
   // Delegated so every button in the app (board cells, menu, dialogs) gets a
   // light tap sound without wiring it into each handler. Buttons that already
   // trigger their own semantic sound (e.g. number pad digits, which play a
   // correct/incorrect/success cue) opt out via data-skip-click-sound so the
-  // two don't layer.
+  // two don't layer. Buttons that change screens (menu ↔ game, new puzzle)
+  // are marked data-sound="transition" to get the wood-knock cue instead.
   useEffect(() => {
     const handleClick = (event: MouseEvent) => {
       const button = (event.target as HTMLElement | null)?.closest('button');
-      if (button && !button.hasAttribute('data-skip-click-sound')) playClick();
+      if (!button || button.hasAttribute('data-skip-click-sound')) return;
+      if (button.getAttribute('data-sound') === 'transition') playScreenChange();
+      else playClick();
     };
     document.addEventListener('click', handleClick);
     return () => document.removeEventListener('click', handleClick);
@@ -68,6 +74,14 @@ function App() {
           onBackToMenu={() => setView('menu')}
         />
       )}
+
+      <InstallPrompt
+        visible={installPrompt.visible}
+        iOS={installPrompt.iOS}
+        canInstall={installPrompt.canInstall}
+        onInstall={installPrompt.install}
+        onDismiss={installPrompt.dismiss}
+      />
     </div>
   );
 }
