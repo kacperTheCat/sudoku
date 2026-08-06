@@ -1,5 +1,6 @@
 import { DIFFICULTY_CLUES, DIFFICULTY_LABELS } from '../sudoku/generator';
-import type { Difficulty, GameState } from '../sudoku/types';
+import type { Difficulty, GameState, Theme } from '../sudoku/types';
+import { ThemeToggle } from './ThemeToggle';
 
 const DIFFICULTIES: Difficulty[] = ['easy', 'medium', 'hard', 'expert'];
 
@@ -12,20 +13,26 @@ function formatTime(totalSeconds: number): string {
 interface MenuScreenProps {
   savedGame: GameState | null;
   isGenerating: boolean;
+  theme: Theme;
   onSelectDifficulty: (difficulty: Difficulty) => void;
   onContinue: () => void;
+  onToggleTheme: () => void;
 }
 
 export function MenuScreen({
   savedGame,
   isGenerating,
+  theme,
   onSelectDifficulty,
   onContinue,
+  onToggleTheme,
 }: MenuScreenProps) {
   const canContinue = !!savedGame && !savedGame.isComplete;
 
   return (
     <div className="screen menu-screen">
+      <ThemeToggle theme={theme} onToggle={onToggleTheme} floating />
+
       <h1 className="menu-screen__title">Sudoku</h1>
 
       {canContinue && (

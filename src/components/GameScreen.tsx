@@ -4,6 +4,7 @@ import { DIFFICULTY_LABELS } from '../sudoku/generator';
 import { Board } from './Board';
 import { NumberPad } from './NumberPad';
 import { Timer } from './Timer';
+import { ThemeToggle } from './ThemeToggle';
 import { WinDialog } from './WinDialog';
 
 interface GameScreenProps {
@@ -18,6 +19,7 @@ interface GameScreenProps {
   onUndo: () => void;
   onToggleShowRemaining: () => void;
   onToggleColorAssists: () => void;
+  onToggleTheme: () => void;
   onPlayAgain: (difficulty: Difficulty) => void;
   onBackToMenu: () => void;
 }
@@ -34,6 +36,7 @@ export function GameScreen({
   onUndo,
   onToggleShowRemaining,
   onToggleColorAssists,
+  onToggleTheme,
   onPlayAgain,
   onBackToMenu,
 }: GameScreenProps) {
@@ -75,7 +78,10 @@ export function GameScreen({
           ← Menu
         </button>
         <span className="game-screen__difficulty">{DIFFICULTY_LABELS[game.difficulty]}</span>
-        <Timer seconds={game.elapsedSeconds} />
+        <div className="game-screen__header-end">
+          <Timer seconds={game.elapsedSeconds} />
+          <ThemeToggle theme={settings.theme} onToggle={onToggleTheme} />
+        </div>
       </header>
 
       <div className="game-screen__body">

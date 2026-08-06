@@ -113,19 +113,16 @@ h2 {
 }
 
 .theme-toggle {
-  position: fixed;
-  top: calc(10px + env(safe-area-inset-top));
-  right: calc(10px + env(safe-area-inset-right));
-  z-index: 15;
-  width: 38px;
-  height: 38px;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
   border-radius: 50%;
   border: 1px solid var(--border);
   background: var(--surface);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 17px;
+  font-size: 15px;
   line-height: 1;
   cursor: pointer;
   box-shadow: var(--shadow);
@@ -133,6 +130,16 @@ h2 {
 
 .theme-toggle:active {
   transform: scale(0.94);
+}
+
+.theme-toggle--floating {
+  position: fixed;
+  top: calc(10px + env(safe-area-inset-top));
+  right: calc(10px + env(safe-area-inset-right));
+  z-index: 15;
+  width: 38px;
+  height: 38px;
+  font-size: 17px;
 }
 
 .screen {
@@ -270,6 +277,12 @@ h2 {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+}
+
+.game-screen__header-end {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .game-screen__body {
