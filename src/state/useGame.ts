@@ -201,12 +201,17 @@ export function useGame() {
           hapticSuccess();
           setStats((s) => {
             const prev = s[next.difficulty];
+            const bestSeconds =
+              prev.bestSeconds === null
+                ? next.elapsedSeconds
+                : Math.min(prev.bestSeconds, next.elapsedSeconds);
             return {
               ...s,
               [next.difficulty]: {
                 gamesCompleted: prev.gamesCompleted + 1,
                 totalSeconds: prev.totalSeconds + next.elapsedSeconds,
                 totalMoves: prev.totalMoves + next.moveCount,
+                bestSeconds,
               },
             };
           });

@@ -61,7 +61,7 @@ export function saveSettings(settings: Settings): void {
 }
 
 function defaultStats(): Stats {
-  const empty = { gamesCompleted: 0, totalSeconds: 0, totalMoves: 0 };
+  const empty = { gamesCompleted: 0, totalSeconds: 0, totalMoves: 0, bestSeconds: null };
   return { easy: { ...empty }, medium: { ...empty }, hard: { ...empty }, expert: { ...empty } };
 }
 

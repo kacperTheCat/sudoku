@@ -42,6 +42,7 @@ export interface DifficultyStats {
   gamesCompleted: number;
   totalSeconds: number;
   totalMoves: number;
+  bestSeconds: number | null;
 }
 
 export type Stats = Record<Difficulty, DifficultyStats>;

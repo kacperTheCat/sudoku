@@ -27,6 +27,11 @@ function formatAverage(stat: { gamesCompleted: number; totalSeconds: number }): 
   return formatTime(Math.round(stat.totalSeconds / stat.gamesCompleted));
 }
 
+function formatBest(stat: { bestSeconds: number | null }): string {
+  if (stat.bestSeconds === null) return '—';
+  return formatTime(stat.bestSeconds);
+}
+
 function pluralRuchy(n: number): string {
   if (n === 1) return 'ruch';
   const lastDigit = n % 10;
@@ -134,7 +139,9 @@ export function MenuScreen({
           <div key={difficulty} className="stats-grid__item">
             <span className="stats-grid__label">{DIFFICULTY_LABELS[difficulty]}</span>
             <span className="stats-grid__value">{stats[difficulty].gamesCompleted} gier</span>
-            <span className="stats-grid__value">śr. {formatAverage(stats[difficulty])}</span>
+            <span className="stats-grid__value">
+              śr. {formatAverage(stats[difficulty])} · rekord {formatBest(stats[difficulty])}
+            </span>
             <span className="stats-grid__value">śr. {formatAverageMoves(stats[difficulty])}</span>
           </div>
         ))}
