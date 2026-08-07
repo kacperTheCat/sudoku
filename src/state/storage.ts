@@ -3,6 +3,8 @@ import type { Difficulty, GameState, Settings, Stats } from '../sudoku/types';
 const GAME_KEY = 'sudoku:v1:game';
 const SETTINGS_KEY = 'sudoku:v1:settings';
 const STATS_KEY = 'sudoku:v1:stats';
+const DAILY_GAME_KEY = 'sudoku:v1:daily-game';
+const DAILY_STREAK_KEY = 'sudoku:v1:daily-streak';
 
 export function loadGame(): GameState | null {
   try {
@@ -84,6 +86,59 @@ export function loadStats(): Stats {
 export function saveStats(stats: Stats): void {
   try {
     localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+  } catch {
+    // ignore
+  }
+}
+
+export interface StoredDailyGame {
+  date: string;
+  game: GameState;
+}
+
+export function loadDailyGame(): StoredDailyGame | null {
+  try {
+    const raw = localStorage.getItem(DAILY_GAME_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { date?: string; game?: Partial<GameState> };
+    if (!parsed.date || !parsed.game) return null;
+    return { date: parsed.date, game: { moveCount: 0, ...parsed.game } as GameState };
+  } catch {
+    return null;
+  }
+}
+
+export function saveDailyGame(entry: StoredDailyGame): void {
+  try {
+    localStorage.setItem(DAILY_GAME_KEY, JSON.stringify(entry));
+  } catch {
+    // ignore
+  }
+}
+
+export interface DailyStreak {
+  currentStreak: number;
+  longestStreak: number;
+  lastCompletedDate: string | null;
+}
+
+function defaultDailyStreak(): DailyStreak {
+  return { currentStreak: 0, longestStreak: 0, lastCompletedDate: null };
+}
+
+export function loadDailyStreak(): DailyStreak {
+  try {
+    const raw = localStorage.getItem(DAILY_STREAK_KEY);
+    if (!raw) return defaultDailyStreak();
+    return { ...defaultDailyStreak(), ...(JSON.parse(raw) as Partial<DailyStreak>) };
+  } catch {
+    return defaultDailyStreak();
+  }
+}
+
+export function saveDailyStreak(streak: DailyStreak): void {
+  try {
+    localStorage.setItem(DAILY_STREAK_KEY, JSON.stringify(streak));
   } catch {
     // ignore
   }

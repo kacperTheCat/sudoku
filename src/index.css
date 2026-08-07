@@ -260,6 +260,19 @@ h2 {
   opacity: 0.85;
 }
 
+.menu-screen__daily {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 16px;
+}
+
+.menu-screen__daily-meta {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
 .stats-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

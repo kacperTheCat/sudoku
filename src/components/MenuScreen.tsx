@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { DIFFICULTY_CLUES, DIFFICULTY_LABELS } from '../sudoku/generator';
 import type { Difficulty, GameState, Stats, Theme, Variant } from '../sudoku/types';
+import type { DailyStreak } from '../state/storage';
 import { ThemeToggle } from './ThemeToggle';
 
 const DIFFICULTIES: Difficulty[] = ['easy', 'medium', 'hard', 'expert'];
@@ -46,13 +47,20 @@ function formatAverageMoves(stat: { gamesCompleted: number; totalMoves: number }
   return `${avg} ${pluralRuchy(avg)}`;
 }
 
+function pluralDni(n: number): string {
+  return n === 1 ? 'dzień' : 'dni';
+}
+
 interface MenuScreenProps {
   savedGame: GameState | null;
   isGenerating: boolean;
   theme: Theme;
   stats: Stats;
+  dailyStreak: DailyStreak;
+  dailyCompletedToday: boolean;
   onSelectDifficulty: (difficulty: Difficulty, variant: Variant) => void;
   onContinue: () => void;
+  onStartDaily: () => void;
   onToggleTheme: () => void;
 }
 
@@ -61,8 +69,11 @@ export function MenuScreen({
   isGenerating,
   theme,
   stats,
+  dailyStreak,
+  dailyCompletedToday,
   onSelectDifficulty,
   onContinue,
+  onStartDaily,
   onToggleTheme,
 }: MenuScreenProps) {
   const [variant, setVariant] = useState<Variant>('classic');
@@ -73,6 +84,20 @@ export function MenuScreen({
       <ThemeToggle theme={theme} onToggle={onToggleTheme} floating />
 
       <h1 className="menu-screen__title">Sudoku</h1>
+
+      <button
+        type="button"
+        className="button button--primary menu-screen__daily"
+        onClick={onStartDaily}
+        data-sound="transition"
+      >
+        <span>Wyzwanie dnia{dailyCompletedToday ? ' ✓' : ''}</span>
+        <span className="menu-screen__daily-meta">
+          {dailyStreak.currentStreak > 0
+            ? `🔥 ${dailyStreak.currentStreak} ${pluralDni(dailyStreak.currentStreak)} z rzędu`
+            : 'Zagraj, żeby zacząć passę'}
+        </span>
+      </button>
 
       {canContinue && (
         <button

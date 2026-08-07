@@ -20,6 +20,7 @@ interface GameScreenProps {
   settings: Settings;
   isGenerating: boolean;
   pulseCells: number[];
+  isDaily?: boolean;
   onSelect: (index: number) => void;
   onDigit: (digit: number) => void;
   onErase: () => void;
@@ -37,6 +38,7 @@ export function GameScreen({
   settings,
   isGenerating,
   pulseCells,
+  isDaily = false,
   onSelect,
   onDigit,
   onErase,
@@ -86,7 +88,7 @@ export function GameScreen({
           ← Menu
         </button>
         <span className="game-screen__difficulty">
-          {DIFFICULTY_LABELS[game.difficulty]}
+          {isDaily ? 'Wyzwanie dnia' : DIFFICULTY_LABELS[game.difficulty]}
           {game.variant === 'x' ? ' · X' : ''}
         </span>
         <div className="game-screen__header-end">
@@ -132,6 +134,7 @@ export function GameScreen({
           difficulty={game.difficulty}
           seconds={game.elapsedSeconds}
           moveCount={game.moveCount}
+          isDaily={isDaily}
           onPlayAgain={() => onPlayAgain(game.difficulty, game.variant)}
           onBackToMenu={onBackToMenu}
         />

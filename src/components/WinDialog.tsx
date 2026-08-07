@@ -11,6 +11,7 @@ interface WinDialogProps {
   difficulty: Difficulty;
   seconds: number;
   moveCount: number;
+  isDaily?: boolean;
   onPlayAgain: () => void;
   onBackToMenu: () => void;
 }
@@ -19,6 +20,7 @@ export function WinDialog({
   difficulty,
   seconds,
   moveCount,
+  isDaily = false,
   onPlayAgain,
   onBackToMenu,
 }: WinDialogProps) {
@@ -27,17 +29,21 @@ export function WinDialog({
       <div className="win-dialog">
         <h2>Rozwiązane!</h2>
         <p className="win-dialog__meta">
-          Poziom: {DIFFICULTY_LABELS[difficulty]} · Czas: {formatTime(seconds)} · Ruchy: {moveCount}
+          {isDaily ? 'Wyzwanie dnia' : `Poziom: ${DIFFICULTY_LABELS[difficulty]}`} · Czas:{' '}
+          {formatTime(seconds)} · Ruchy: {moveCount}
         </p>
+        {isDaily && <p className="win-dialog__meta">Wróć jutro po nowe wyzwanie!</p>}
         <div className="win-dialog__actions">
-          <button
-            type="button"
-            className="button button--primary"
-            onClick={onPlayAgain}
-            data-sound="transition"
-          >
-            Kolejna łamigłówka
-          </button>
+          {!isDaily && (
+            <button
+              type="button"
+              className="button button--primary"
+              onClick={onPlayAgain}
+              data-sound="transition"
+            >
+              Kolejna łamigłówka
+            </button>
+          )}
           <button type="button" className="button" onClick={onBackToMenu} data-sound="transition">
             Powrót do menu
           </button>
