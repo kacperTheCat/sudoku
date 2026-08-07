@@ -89,6 +89,7 @@ function App() {
       <InstallPrompt
         visible={installPrompt.visible}
         iOS={installPrompt.iOS}
+        iOSNonSafari={installPrompt.iOSNonSafari}
         canInstall={installPrompt.canInstall}
         onInstall={installPrompt.install}
         onDismiss={installPrompt.dismiss}

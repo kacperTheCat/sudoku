@@ -13,6 +13,21 @@ function isIOSDevice(): boolean {
   return /iphone|ipad|ipod/i.test(navigator.userAgent) && !('MSStream' in window);
 }
 
+/**
+ * On iOS, every browser is a WebKit wrapper, but only Safari itself can add
+ * a page to the home screen as a real standalone app (manifest + offline
+ * support) — other browsers' "add to home screen" just bookmarks the URL
+ * back into that browser's chrome. Chrome/Firefox/Edge/Opera on iOS tag
+ * their UA distinctly; Brave deliberately mimics Safari's UA, so we fall
+ * back to its injected `navigator.brave` for that case.
+ */
+function isIOSNonSafariBrowser(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent;
+  if (/crios|fxios|edgios|opios|opr\//i.test(ua)) return true;
+  return 'brave' in navigator;
+}
+
 function isStandaloneMode(): boolean {
   if (typeof window === 'undefined') return false;
   const nav = navigator as Navigator & { standalone?: boolean };
@@ -30,6 +45,7 @@ export function useInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [visible, setVisible] = useState(false);
   const [iOS] = useState(isIOSDevice);
+  const [iOSNonSafari] = useState(isIOSNonSafariBrowser);
 
   useEffect(() => {
     if (isStandaloneMode()) return;
@@ -66,5 +82,5 @@ export function useInstallPrompt() {
     dismiss();
   }, [deferredPrompt, dismiss]);
 
-  return { visible, iOS, canInstall: deferredPrompt !== null, install, dismiss };
+  return { visible, iOS, iOSNonSafari, canInstall: deferredPrompt !== null, install, dismiss };
 }
