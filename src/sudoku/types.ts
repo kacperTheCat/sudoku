@@ -2,10 +2,16 @@ export type Difficulty = 'easy' | 'medium' | 'hard' | 'expert';
 
 export type Variant = 'classic' | 'x';
 
+export interface ClearedPeerNote {
+  index: number;
+  prevNotes: number[];
+}
+
 export interface HistoryEntry {
   index: number;
   prevValue: number;
   prevNotes: number[];
+  clearedPeerNotes: ClearedPeerNote[];
 }
 
 export interface GameState {

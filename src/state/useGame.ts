@@ -35,10 +35,50 @@ function applyCellChange(
   const notesList = game.notes.slice();
   notesList[index] = notes;
 
-  const history = [...game.history, { index, prevValue, prevNotes }];
+  const history = [...game.history, { index, prevValue, prevNotes, clearedPeerNotes: [] }];
   const isComplete = arraysEqual(values, game.solution);
 
   return { ...game, values, notes: notesList, history, moveCount: game.moveCount + 1, isComplete };
+}
+
+/**
+ * Placing a digit (as opposed to toggling a note) also strips that digit
+ * from every peer cell's notes — the classic "auto pencil-mark cleanup"
+ * behaviour. Cleared peer notes are recorded on the history entry so undo
+ * can restore them, not just the placed cell itself.
+ */
+function applyDigitPlacement(
+  game: GameState,
+  index: number,
+  digit: number,
+  peers: readonly number[][],
+): GameState {
+  if (game.givens[index] !== 0) return game;
+
+  const prevValue = game.values[index];
+  const prevNotes = game.notes[index];
+  const value = prevValue === digit ? 0 : digit;
+
+  const values = game.values.slice();
+  values[index] = value;
+  const notes = game.notes.slice();
+  notes[index] = [];
+
+  const clearedPeerNotes: { index: number; prevNotes: number[] }[] = [];
+  if (value !== 0) {
+    for (const p of peers[index]) {
+      const peerNotes = notes[p];
+      if (peerNotes.includes(digit)) {
+        clearedPeerNotes.push({ index: p, prevNotes: peerNotes });
+        notes[p] = peerNotes.filter((n) => n !== digit);
+      }
+    }
+  }
+
+  const history = [...game.history, { index, prevValue, prevNotes, clearedPeerNotes }];
+  const isComplete = arraysEqual(values, game.solution);
+
+  return { ...game, values, notes, history, moveCount: game.moveCount + 1, isComplete };
 }
 
 export function useGame() {
@@ -137,15 +177,12 @@ export function useGame() {
         return;
       }
 
-      const next = applyCellChange(game, index, (_notes, value) => ({
-        value: value === digit ? 0 : digit,
-        notes: [],
-      }));
+      const peers = game.variant === 'x' ? DIAGONAL_PEERS : PEERS;
+      const next = applyDigitPlacement(game, index, digit, peers);
       setGame(next);
 
       if (next !== game && next.values[index] !== 0) {
         if (settings.colorAssists) {
-          const peers = next.variant === 'x' ? DIAGONAL_PEERS : PEERS;
           const duplicatePeers = peers[index].filter((p) => next.values[p] === next.values[index]);
           if (duplicatePeers.length > 0) {
             if (pulseTimeoutRef.current) window.clearTimeout(pulseTimeoutRef.current);
@@ -202,6 +239,11 @@ export function useGame() {
       values[last.index] = last.prevValue;
       const notes = g.notes.slice();
       notes[last.index] = last.prevNotes;
+      // Older saves may have history entries from before auto-clear-notes
+      // existed, so this field can be missing on them.
+      for (const cleared of last.clearedPeerNotes ?? []) {
+        notes[cleared.index] = cleared.prevNotes;
+      }
       const isComplete = arraysEqual(values, g.solution);
       return { ...g, values, notes, history, selected: last.index, isComplete };
     });
