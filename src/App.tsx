@@ -9,6 +9,7 @@ import { InstallPrompt } from './components/InstallPrompt';
 import { UpdateOverlay } from './components/UpdateOverlay';
 import type { Difficulty, Variant } from './sudoku/types';
 import { playClick, playScreenChange } from './sudoku/sound';
+import { hapticTap } from './sudoku/haptics';
 
 type View = 'menu' | 'game';
 type Mode = 'normal' | 'daily';
@@ -40,17 +41,21 @@ function App() {
   const { updating } = useAppUpdate();
 
   // Delegated so every button in the app (board cells, menu, dialogs) gets a
-  // light tap sound without wiring it into each handler. Buttons that already
-  // trigger their own semantic sound (e.g. number pad digits, which play a
-  // correct/incorrect/success cue) opt out via data-skip-click-sound so the
-  // two don't layer. Buttons that change screens (menu ↔ game, new puzzle)
-  // are marked data-sound="transition" to get the wood-knock cue instead.
+  // light tap sound + haptic without wiring it into each handler. Buttons
+  // that already trigger their own semantic sound (e.g. number pad digits,
+  // which play a correct/incorrect/success cue) opt out via
+  // data-skip-click-sound so the two don't layer. Buttons that change
+  // screens (menu ↔ game, new puzzle) are marked data-sound="transition" to
+  // get the wood-knock cue instead. The tap haptic is deliberately much
+  // lighter than the correct/incorrect/success ones so it reads as ambient
+  // touch feedback, not a result cue.
   useEffect(() => {
     const handleClick = (event: MouseEvent) => {
       const button = (event.target as HTMLElement | null)?.closest('button');
       if (!button || button.hasAttribute('data-skip-click-sound')) return;
       if (button.getAttribute('data-sound') === 'transition') playScreenChange();
       else playClick();
+      hapticTap();
     };
     document.addEventListener('click', handleClick);
     return () => document.removeEventListener('click', handleClick);

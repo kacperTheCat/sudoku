@@ -5,6 +5,11 @@ function vibrate(pattern: number | number[]): void {
   navigator.vibrate(pattern);
 }
 
+/** Barely-there tick for everyday UI taps — lighter than correct/incorrect/success. */
+export function hapticTap(): void {
+  vibrate(6);
+}
+
 export function hapticCorrect(): void {
   vibrate(15);
 }
