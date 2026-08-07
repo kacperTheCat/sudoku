@@ -10,11 +10,15 @@ import { UpdateOverlay } from './components/UpdateOverlay';
 import type { Difficulty, Variant } from './sudoku/types';
 import { playClick, playScreenChange } from './sudoku/sound';
 import { hapticTap } from './sudoku/haptics';
+import { loadGame } from './state/storage';
 
 type View = 'menu' | 'game';
 type Mode = 'normal' | 'daily';
 
 function App() {
+  const [view, setView] = useState<View>(() => (loadGame() ? 'game' : 'menu'));
+  const [mode, setMode] = useState<Mode>('normal');
+
   const {
     game,
     settings,
@@ -31,12 +35,10 @@ function App() {
     toggleShowRemaining,
     toggleColorAssists,
     toggleTheme,
-  } = useGame();
+  } = useGame(view === 'game' && mode === 'normal');
 
-  const daily = useDailyChallenge(settings.colorAssists);
+  const daily = useDailyChallenge(settings.colorAssists, view === 'game' && mode === 'daily');
 
-  const [view, setView] = useState<View>(() => (game ? 'game' : 'menu'));
-  const [mode, setMode] = useState<Mode>('normal');
   const installPrompt = useInstallPrompt();
   const { updating } = useAppUpdate();
 

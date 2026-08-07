@@ -30,7 +30,7 @@ const CONFLICT_PULSE_MS = 450;
  * localStorage keys, own history/notes/moveCount) so playing the daily
  * challenge never disturbs an in-progress regular game or vice versa.
  */
-export function useDailyChallenge(colorAssists: boolean) {
+export function useDailyChallenge(colorAssists: boolean, isActive: boolean) {
   const [today] = useState(todayDateKey);
   const [game, setGame] = useState<GameState | null>(() => {
     const stored = loadDailyGame();
@@ -83,14 +83,15 @@ export function useDailyChallenge(colorAssists: boolean) {
     saveDailyStreak(streak);
   }, [streak]);
 
-  // Paused once solved, same as the regular game's timer.
+  // Paused once solved or while not the active screen, same as the regular
+  // game's timer.
   useEffect(() => {
-    if (!game || game.isComplete) return;
+    if (!game || game.isComplete || !isActive) return;
     const id = window.setInterval(() => {
       setGame((g) => (g ? { ...g, elapsedSeconds: g.elapsedSeconds + 1 } : g));
     }, 1000);
     return () => window.clearInterval(id);
-  }, [game === null, game?.isComplete]);
+  }, [game === null, game?.isComplete, isActive]);
 
   const selectCell = useCallback((index: number) => {
     setGame((g) => (g ? { ...g, selected: index } : g));

@@ -16,7 +16,7 @@ import {
 
 const CONFLICT_PULSE_MS = 450;
 
-export function useGame() {
+export function useGame(isActive: boolean) {
   const [game, setGame] = useState<GameState | null>(() => loadGame());
   const [settings, setSettings] = useState<Settings>(() => loadSettings());
   const [stats, setStats] = useState<Stats>(() => loadStats());
@@ -49,14 +49,17 @@ export function useGame() {
     document.documentElement.setAttribute('data-theme', settings.theme);
   }, [settings.theme]);
 
-  // Elapsed-time ticker, paused once the puzzle is solved.
+  // Elapsed-time ticker, paused once the puzzle is solved or while the
+  // player has navigated away from the game screen (e.g. back to the menu)
+  // — otherwise time keeps accruing in the background, unfairly inflating
+  // completion times.
   useEffect(() => {
-    if (!game || game.isComplete) return;
+    if (!game || game.isComplete || !isActive) return;
     const id = window.setInterval(() => {
       setGame((g) => (g ? { ...g, elapsedSeconds: g.elapsedSeconds + 1 } : g));
     }, 1000);
     return () => window.clearInterval(id);
-  }, [game === null, game?.isComplete]);
+  }, [game === null, game?.isComplete, isActive]);
 
   const newGame = useCallback((difficulty: Difficulty, variant: Variant = 'classic') => {
     setIsGenerating(true);
