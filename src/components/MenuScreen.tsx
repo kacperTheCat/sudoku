@@ -1,8 +1,16 @@
+import { useState } from 'react';
 import { DIFFICULTY_CLUES, DIFFICULTY_LABELS } from '../sudoku/generator';
-import type { Difficulty, GameState, Stats, Theme } from '../sudoku/types';
+import type { Difficulty, GameState, Stats, Theme, Variant } from '../sudoku/types';
 import { ThemeToggle } from './ThemeToggle';
 
 const DIFFICULTIES: Difficulty[] = ['easy', 'medium', 'hard', 'expert'];
+
+const VARIANTS: Variant[] = ['classic', 'x'];
+
+const VARIANT_LABELS: Record<Variant, string> = {
+  classic: 'Klasyczny',
+  x: 'Sudoku X',
+};
 
 function formatTime(totalSeconds: number): string {
   const minutes = Math.floor(totalSeconds / 60);
@@ -20,7 +28,7 @@ interface MenuScreenProps {
   isGenerating: boolean;
   theme: Theme;
   stats: Stats;
-  onSelectDifficulty: (difficulty: Difficulty) => void;
+  onSelectDifficulty: (difficulty: Difficulty, variant: Variant) => void;
   onContinue: () => void;
   onToggleTheme: () => void;
 }
@@ -34,6 +42,7 @@ export function MenuScreen({
   onContinue,
   onToggleTheme,
 }: MenuScreenProps) {
+  const [variant, setVariant] = useState<Variant>('classic');
   const canContinue = !!savedGame && !savedGame.isComplete;
 
   return (
@@ -51,9 +60,29 @@ export function MenuScreen({
         >
           <span>Kontynuuj grę</span>
           <span className="menu-screen__continue-meta">
-            {DIFFICULTY_LABELS[savedGame!.difficulty]} · {formatTime(savedGame!.elapsedSeconds)}
+            {DIFFICULTY_LABELS[savedGame!.difficulty]}
+            {savedGame!.variant === 'x' ? ' · Sudoku X' : ''} · {formatTime(savedGame!.elapsedSeconds)}
           </span>
         </button>
+      )}
+
+      <p className="menu-screen__prompt">Tryb (eksperymentalny)</p>
+      <div className="variant-toggle">
+        {VARIANTS.map((v) => (
+          <button
+            key={v}
+            type="button"
+            className={`variant-toggle__option${variant === v ? ' variant-toggle__option--active' : ''}`}
+            onClick={() => setVariant(v)}
+          >
+            {VARIANT_LABELS[v]}
+          </button>
+        ))}
+      </div>
+      {variant === 'x' && (
+        <p className="menu-screen__variant-hint">
+          Dodatkowa zasada: obie główne przekątne też muszą zawierać unikalne cyfry 1-9.
+        </p>
       )}
 
       <p className="menu-screen__prompt">Nowa gra</p>
@@ -64,7 +93,7 @@ export function MenuScreen({
             type="button"
             className="button difficulty-button"
             disabled={isGenerating}
-            onClick={() => onSelectDifficulty(difficulty)}
+            onClick={() => onSelectDifficulty(difficulty, variant)}
             data-sound="transition"
           >
             <span className="difficulty-button__label">{DIFFICULTY_LABELS[difficulty]}</span>

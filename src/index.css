@@ -13,6 +13,7 @@
   --peer-bg: rgba(109, 40, 217, 0.06);
   --selected-bg: rgba(109, 40, 217, 0.18);
   --same-value-bg: rgba(109, 40, 217, 0.1);
+  --diagonal-bg: rgba(217, 119, 6, 0.07);
   --correct: #15803d;
   --incorrect: #dc2626;
   --incorrect-bg: rgba(220, 38, 38, 0.12);
@@ -43,6 +44,7 @@
     --peer-bg: rgba(167, 139, 250, 0.08);
     --selected-bg: rgba(167, 139, 250, 0.24);
     --same-value-bg: rgba(167, 139, 250, 0.14);
+    --diagonal-bg: rgba(251, 191, 36, 0.09);
     --correct: #4ade80;
     --incorrect: #f87171;
     --incorrect-bg: rgba(248, 113, 113, 0.18);
@@ -66,6 +68,7 @@
   --peer-bg: rgba(167, 139, 250, 0.08);
   --selected-bg: rgba(167, 139, 250, 0.24);
   --same-value-bg: rgba(167, 139, 250, 0.14);
+  --diagonal-bg: rgba(251, 191, 36, 0.09);
   --correct: #4ade80;
   --incorrect: #f87171;
   --incorrect-bg: rgba(248, 113, 113, 0.18);
@@ -208,6 +211,40 @@ h2 {
 .difficulty-button__clues {
   font-size: 13px;
   color: var(--text-muted);
+}
+
+.variant-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.variant-toggle__option {
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-muted);
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.variant-toggle__option--active {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.menu-screen__variant-hint {
+  margin: -4px 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.4;
 }
 
 .menu-screen__continue {
@@ -373,6 +410,13 @@ h2 {
 
 .cell--box-bottom {
   border-bottom: 2px solid var(--border-strong);
+}
+
+/* Sudoku X: subtle diagonal tint. Placed before every other state class so
+   status/interaction backgrounds (given/correct/incorrect/peer/selected)
+   always win when combined with it. */
+.cell--diagonal {
+  background: var(--diagonal-bg);
 }
 
 .cell--given {

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import type { Difficulty, GameState, Settings, Stats } from '../sudoku/types';
+import type { Difficulty, GameState, Settings, Stats, Variant } from '../sudoku/types';
 import { generatePuzzle } from '../sudoku/generator';
-import { PEERS } from '../sudoku/solver';
+import { PEERS, DIAGONAL_PEERS } from '../sudoku/solver';
 import { loadGame, saveGame, loadSettings, saveSettings, loadStats, saveStats } from './storage';
 import { playCorrect, playIncorrect, playSuccess } from '../sudoku/sound';
 
@@ -83,14 +83,15 @@ export function useGame() {
     return () => window.clearInterval(id);
   }, [game === null, game?.isComplete]);
 
-  const newGame = useCallback((difficulty: Difficulty) => {
+  const newGame = useCallback((difficulty: Difficulty, variant: Variant = 'classic') => {
     setIsGenerating(true);
     // Deferred so the UI can paint the "generating" state before the
     // (occasionally ~0.5s) synchronous backtracking search runs.
     window.setTimeout(() => {
-      const { givens, solution } = generatePuzzle(difficulty);
+      const { givens, solution } = generatePuzzle(difficulty, variant);
       const fresh: GameState = {
         difficulty,
+        variant,
         givens,
         solution,
         values: givens.slice(),
@@ -143,7 +144,8 @@ export function useGame() {
 
       if (next !== game && next.values[index] !== 0) {
         if (settings.colorAssists) {
-          const duplicatePeers = PEERS[index].filter((p) => next.values[p] === next.values[index]);
+          const peers = next.variant === 'x' ? DIAGONAL_PEERS : PEERS;
+          const duplicatePeers = peers[index].filter((p) => next.values[p] === next.values[index]);
           if (duplicatePeers.length > 0) {
             if (pulseTimeoutRef.current) window.clearTimeout(pulseTimeoutRef.current);
             setPulseCells([index, ...duplicatePeers]);

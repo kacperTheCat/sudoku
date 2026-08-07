@@ -6,7 +6,7 @@ import { MenuScreen } from './components/MenuScreen';
 import { GameScreen } from './components/GameScreen';
 import { InstallPrompt } from './components/InstallPrompt';
 import { UpdateOverlay } from './components/UpdateOverlay';
-import type { Difficulty } from './sudoku/types';
+import type { Difficulty, Variant } from './sudoku/types';
 import { playClick, playScreenChange } from './sudoku/sound';
 
 type View = 'menu' | 'game';
@@ -50,8 +50,8 @@ function App() {
     return () => document.removeEventListener('click', handleClick);
   }, []);
 
-  const handleSelectDifficulty = (difficulty: Difficulty) => {
-    newGame(difficulty);
+  const handleSelectDifficulty = (difficulty: Difficulty, variant: Variant = 'classic') => {
+    newGame(difficulty, variant);
     setView('game');
   };
 

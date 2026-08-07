@@ -1,5 +1,5 @@
-import type { Difficulty } from './types';
-import { candidatesFor, countSolutions } from './solver';
+import type { Difficulty, Variant } from './types';
+import { candidatesFor, countSolutions, PEERS, DIAGONAL_PEERS } from './solver';
 
 const CELL_COUNT = 81;
 
@@ -17,6 +17,10 @@ export const DIFFICULTY_LABELS: Record<Difficulty, string> = {
   expert: 'Ekspert',
 };
 
+function peersFor(variant: Variant): readonly number[][] {
+  return variant === 'x' ? DIAGONAL_PEERS : PEERS;
+}
+
 function shuffle<T>(items: T[]): T[] {
   const result = items.slice();
   for (let i = result.length - 1; i > 0; i--) {
@@ -26,7 +30,7 @@ function shuffle<T>(items: T[]): T[] {
   return result;
 }
 
-export function generateFullBoard(): number[] {
+export function generateFullBoard(peers: readonly number[][] = PEERS): number[] {
   const grid = new Array(CELL_COUNT).fill(0);
 
   function step(): boolean {
@@ -34,7 +38,7 @@ export function generateFullBoard(): number[] {
     let bestCandidates: number[] = [];
     for (let i = 0; i < CELL_COUNT; i++) {
       if (grid[i] !== 0) continue;
-      const candidates = shuffle(candidatesFor(grid, i));
+      const candidates = shuffle(candidatesFor(grid, i, peers));
       if (candidates.length === 0) return false;
       if (bestIndex === -1 || candidates.length < bestCandidates.length) {
         bestIndex = i;
@@ -72,7 +76,7 @@ const MAX_GENERATION_ATTEMPTS = 15;
  * once a full pass removes nothing we stop (further passes would repeat
  * the same dead end).
  */
-function removeClues(solution: number[], targetClues: number): number[] {
+function removeClues(solution: number[], targetClues: number, peers: readonly number[][]): number[] {
   const givens = solution.slice();
   let clues = CELL_COUNT;
 
@@ -86,7 +90,7 @@ function removeClues(solution: number[], targetClues: number): number[] {
       if (clues <= targetClues) break;
       const backup = givens[index];
       givens[index] = 0;
-      if (countSolutions(givens, 2) === 1) {
+      if (countSolutions(givens, 2, peers) === 1) {
         clues--;
         removedThisPass = true;
       } else {
@@ -107,15 +111,16 @@ function removeClues(solution: number[], targetClues: number): number[] {
  * fresh board is cheap (tens of ms), so we keep trying until we hit the
  * target or exhaust the attempt budget, keeping the best result seen.
  */
-export function generatePuzzle(difficulty: Difficulty): GeneratedPuzzle {
+export function generatePuzzle(difficulty: Difficulty, variant: Variant = 'classic'): GeneratedPuzzle {
   const targetClues = DIFFICULTY_CLUES[difficulty];
+  const peers = peersFor(variant);
 
   let best: GeneratedPuzzle | null = null;
   let bestClueCount = Infinity;
 
   for (let attempt = 0; attempt < MAX_GENERATION_ATTEMPTS; attempt++) {
-    const solution = generateFullBoard();
-    const givens = removeClues(solution, targetClues);
+    const solution = generateFullBoard(peers);
+    const givens = removeClues(solution, targetClues, peers);
     const clueCount = givens.filter((v) => v !== 0).length;
 
     if (clueCount < bestClueCount) {

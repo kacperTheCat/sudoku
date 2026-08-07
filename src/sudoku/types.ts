@@ -1,5 +1,7 @@
 export type Difficulty = 'easy' | 'medium' | 'hard' | 'expert';
 
+export type Variant = 'classic' | 'x';
+
 export interface HistoryEntry {
   index: number;
   prevValue: number;
@@ -8,6 +10,7 @@ export interface HistoryEntry {
 
 export interface GameState {
   difficulty: Difficulty;
+  variant: Variant;
   givens: number[];
   solution: number[];
   values: number[];

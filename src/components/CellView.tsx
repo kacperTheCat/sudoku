@@ -5,6 +5,7 @@ interface CellViewProps {
   isSelected: boolean;
   isPeer: boolean;
   isSameValue: boolean;
+  isDiagonal: boolean;
   status: 'correct' | 'incorrect' | undefined;
   isPulsing: boolean;
   rightEdge: boolean;
@@ -19,6 +20,7 @@ export function CellView({
   isSelected,
   isPeer,
   isSameValue,
+  isDiagonal,
   status,
   isPulsing,
   rightEdge,
@@ -36,6 +38,7 @@ export function CellView({
   const classes = [
     'cell',
     digitClass,
+    isDiagonal ? 'cell--diagonal' : '',
     isSelected ? 'cell--selected' : '',
     !isSelected && isPeer ? 'cell--peer' : '',
     !isSelected && isSameValue ? 'cell--same-value' : '',

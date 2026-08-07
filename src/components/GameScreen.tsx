@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { Difficulty, GameState, Settings } from '../sudoku/types';
+import type { Difficulty, GameState, Settings, Variant } from '../sudoku/types';
 import { DIFFICULTY_LABELS } from '../sudoku/generator';
 import { Board } from './Board';
 import { NumberPad } from './NumberPad';
@@ -20,7 +20,7 @@ interface GameScreenProps {
   onToggleShowRemaining: () => void;
   onToggleColorAssists: () => void;
   onToggleTheme: () => void;
-  onPlayAgain: (difficulty: Difficulty) => void;
+  onPlayAgain: (difficulty: Difficulty, variant: Variant) => void;
   onBackToMenu: () => void;
 }
 
@@ -77,7 +77,10 @@ export function GameScreen({
         >
           ← Menu
         </button>
-        <span className="game-screen__difficulty">{DIFFICULTY_LABELS[game.difficulty]}</span>
+        <span className="game-screen__difficulty">
+          {DIFFICULTY_LABELS[game.difficulty]}
+          {game.variant === 'x' ? ' · X' : ''}
+        </span>
         <div className="game-screen__header-end">
           <Timer seconds={game.elapsedSeconds} />
           <ThemeToggle theme={settings.theme} onToggle={onToggleTheme} />
@@ -92,6 +95,7 @@ export function GameScreen({
           selected={game.selected}
           cellStatus={cellStatus}
           pulseCells={pulseCells}
+          variant={game.variant}
           onSelect={onSelect}
         />
 
@@ -114,7 +118,7 @@ export function GameScreen({
         <WinDialog
           difficulty={game.difficulty}
           seconds={game.elapsedSeconds}
-          onPlayAgain={() => onPlayAgain(game.difficulty)}
+          onPlayAgain={() => onPlayAgain(game.difficulty, game.variant)}
           onBackToMenu={onBackToMenu}
         />
       )}
