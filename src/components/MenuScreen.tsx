@@ -27,6 +27,20 @@ function formatAverage(stat: { gamesCompleted: number; totalSeconds: number }): 
   return formatTime(Math.round(stat.totalSeconds / stat.gamesCompleted));
 }
 
+function pluralRuchy(n: number): string {
+  if (n === 1) return 'ruch';
+  const lastDigit = n % 10;
+  const lastTwo = n % 100;
+  if (lastDigit >= 2 && lastDigit <= 4 && !(lastTwo >= 12 && lastTwo <= 14)) return 'ruchy';
+  return 'ruchów';
+}
+
+function formatAverageMoves(stat: { gamesCompleted: number; totalMoves: number }): string {
+  if (stat.gamesCompleted === 0) return '—';
+  const avg = Math.round(stat.totalMoves / stat.gamesCompleted);
+  return `${avg} ${pluralRuchy(avg)}`;
+}
+
 interface MenuScreenProps {
   savedGame: GameState | null;
   isGenerating: boolean;
@@ -121,6 +135,7 @@ export function MenuScreen({
             <span className="stats-grid__label">{DIFFICULTY_LABELS[difficulty]}</span>
             <span className="stats-grid__value">{stats[difficulty].gamesCompleted} gier</span>
             <span className="stats-grid__value">śr. {formatAverage(stats[difficulty])}</span>
+            <span className="stats-grid__value">śr. {formatAverageMoves(stats[difficulty])}</span>
           </div>
         ))}
       </div>

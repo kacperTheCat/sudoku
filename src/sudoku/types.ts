@@ -19,6 +19,7 @@ export interface GameState {
   history: HistoryEntry[];
   notesMode: boolean;
   elapsedSeconds: number;
+  moveCount: number;
   isComplete: boolean;
   startedAt: number;
 }
@@ -34,6 +35,7 @@ export interface Settings {
 export interface DifficultyStats {
   gamesCompleted: number;
   totalSeconds: number;
+  totalMoves: number;
 }
 
 export type Stats = Record<Difficulty, DifficultyStats>;

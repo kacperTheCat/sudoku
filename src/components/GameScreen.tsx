@@ -7,6 +7,14 @@ import { Timer } from './Timer';
 import { ThemeToggle } from './ThemeToggle';
 import { WinDialog } from './WinDialog';
 
+function pluralRuchy(n: number): string {
+  if (n === 1) return 'ruch';
+  const lastDigit = n % 10;
+  const lastTwo = n % 100;
+  if (lastDigit >= 2 && lastDigit <= 4 && !(lastTwo >= 12 && lastTwo <= 14)) return 'ruchy';
+  return 'ruchów';
+}
+
 interface GameScreenProps {
   game: GameState | null;
   settings: Settings;
@@ -82,7 +90,12 @@ export function GameScreen({
           {game.variant === 'x' ? ' · X' : ''}
         </span>
         <div className="game-screen__header-end">
-          <Timer seconds={game.elapsedSeconds} />
+          <span className="game-screen__stats">
+            <Timer seconds={game.elapsedSeconds} />
+            <span className="move-counter">
+              {game.moveCount} {pluralRuchy(game.moveCount)}
+            </span>
+          </span>
           <ThemeToggle theme={settings.theme} onToggle={onToggleTheme} />
         </div>
       </header>
@@ -118,6 +131,7 @@ export function GameScreen({
         <WinDialog
           difficulty={game.difficulty}
           seconds={game.elapsedSeconds}
+          moveCount={game.moveCount}
           onPlayAgain={() => onPlayAgain(game.difficulty, game.variant)}
           onBackToMenu={onBackToMenu}
         />

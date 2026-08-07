@@ -10,17 +10,24 @@ function formatTime(totalSeconds: number): string {
 interface WinDialogProps {
   difficulty: Difficulty;
   seconds: number;
+  moveCount: number;
   onPlayAgain: () => void;
   onBackToMenu: () => void;
 }
 
-export function WinDialog({ difficulty, seconds, onPlayAgain, onBackToMenu }: WinDialogProps) {
+export function WinDialog({
+  difficulty,
+  seconds,
+  moveCount,
+  onPlayAgain,
+  onBackToMenu,
+}: WinDialogProps) {
   return (
     <div className="win-overlay" role="dialog" aria-modal="true" aria-label="Wygrana">
       <div className="win-dialog">
         <h2>Rozwiązane!</h2>
         <p className="win-dialog__meta">
-          Poziom: {DIFFICULTY_LABELS[difficulty]} · Czas: {formatTime(seconds)}
+          Poziom: {DIFFICULTY_LABELS[difficulty]} · Czas: {formatTime(seconds)} · Ruchy: {moveCount}
         </p>
         <div className="win-dialog__actions">
           <button

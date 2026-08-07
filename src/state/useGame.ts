@@ -38,7 +38,7 @@ function applyCellChange(
   const history = [...game.history, { index, prevValue, prevNotes }];
   const isComplete = arraysEqual(values, game.solution);
 
-  return { ...game, values, notes: notesList, history, isComplete };
+  return { ...game, values, notes: notesList, history, moveCount: game.moveCount + 1, isComplete };
 }
 
 export function useGame() {
@@ -100,6 +100,7 @@ export function useGame() {
         history: [],
         notesMode: false,
         elapsedSeconds: 0,
+        moveCount: 0,
         isComplete: false,
         startedAt: Date.now(),
       };
@@ -166,6 +167,7 @@ export function useGame() {
               [next.difficulty]: {
                 gamesCompleted: prev.gamesCompleted + 1,
                 totalSeconds: prev.totalSeconds + next.elapsedSeconds,
+                totalMoves: prev.totalMoves + next.moveCount,
               },
             };
           });

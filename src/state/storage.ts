@@ -1,4 +1,4 @@
-import type { GameState, Settings, Stats } from '../sudoku/types';
+import type { Difficulty, GameState, Settings, Stats } from '../sudoku/types';
 
 const GAME_KEY = 'sudoku:v1:game';
 const SETTINGS_KEY = 'sudoku:v1:settings';
@@ -8,7 +8,10 @@ export function loadGame(): GameState | null {
   try {
     const raw = localStorage.getItem(GAME_KEY);
     if (!raw) return null;
-    return JSON.parse(raw) as GameState;
+    const parsed = JSON.parse(raw) as Partial<GameState>;
+    // Older saves (pre move-tracking) lack moveCount — default it in rather
+    // than let it stay undefined and poison the +1 arithmetic in applyCellChange.
+    return { moveCount: 0, ...parsed } as GameState;
   } catch {
     return null;
   }
@@ -58,7 +61,7 @@ export function saveSettings(settings: Settings): void {
 }
 
 function defaultStats(): Stats {
-  const empty = { gamesCompleted: 0, totalSeconds: 0 };
+  const empty = { gamesCompleted: 0, totalSeconds: 0, totalMoves: 0 };
   return { easy: { ...empty }, medium: { ...empty }, hard: { ...empty }, expert: { ...empty } };
 }
 
@@ -66,7 +69,13 @@ export function loadStats(): Stats {
   try {
     const raw = localStorage.getItem(STATS_KEY);
     if (!raw) return defaultStats();
-    return { ...defaultStats(), ...(JSON.parse(raw) as Partial<Stats>) };
+    const parsed = JSON.parse(raw) as Partial<Record<Difficulty, Partial<Stats[Difficulty]>>>;
+    const defaults = defaultStats();
+    const merged = defaultStats();
+    for (const difficulty of Object.keys(defaults) as Difficulty[]) {
+      merged[difficulty] = { ...defaults[difficulty], ...parsed[difficulty] };
+    }
+    return merged;
   } catch {
     return defaultStats();
   }
