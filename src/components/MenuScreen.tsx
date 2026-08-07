@@ -5,6 +5,10 @@ import { ThemeToggle } from './ThemeToggle';
 
 const DIFFICULTIES: Difficulty[] = ['easy', 'medium', 'hard', 'expert'];
 
+// Sudoku X is implemented and working, just hidden from the menu for now —
+// flip this back on to re-expose the Klasyczny/Sudoku X picker.
+const SHOW_EXPERIMENTAL_VARIANT = false;
+
 const VARIANTS: Variant[] = ['classic', 'x'];
 
 const VARIANT_LABELS: Record<Variant, string> = {
@@ -66,23 +70,27 @@ export function MenuScreen({
         </button>
       )}
 
-      <p className="menu-screen__prompt">Tryb (eksperymentalny)</p>
-      <div className="variant-toggle">
-        {VARIANTS.map((v) => (
-          <button
-            key={v}
-            type="button"
-            className={`variant-toggle__option${variant === v ? ' variant-toggle__option--active' : ''}`}
-            onClick={() => setVariant(v)}
-          >
-            {VARIANT_LABELS[v]}
-          </button>
-        ))}
-      </div>
-      {variant === 'x' && (
-        <p className="menu-screen__variant-hint">
-          Dodatkowa zasada: obie główne przekątne też muszą zawierać unikalne cyfry 1-9.
-        </p>
+      {SHOW_EXPERIMENTAL_VARIANT && (
+        <>
+          <p className="menu-screen__prompt">Tryb (eksperymentalny)</p>
+          <div className="variant-toggle">
+            {VARIANTS.map((v) => (
+              <button
+                key={v}
+                type="button"
+                className={`variant-toggle__option${variant === v ? ' variant-toggle__option--active' : ''}`}
+                onClick={() => setVariant(v)}
+              >
+                {VARIANT_LABELS[v]}
+              </button>
+            ))}
+          </div>
+          {variant === 'x' && (
+            <p className="menu-screen__variant-hint">
+              Dodatkowa zasada: obie główne przekątne też muszą zawierać unikalne cyfry 1-9.
+            </p>
+          )}
+        </>
       )}
 
       <p className="menu-screen__prompt">Nowa gra</p>
