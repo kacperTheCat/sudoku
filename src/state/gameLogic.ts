@@ -1,4 +1,4 @@
-import type { GameState } from '../sudoku/types';
+import type { GameState, HistoryEntry } from '../sudoku/types';
 
 export const CELL_COUNT = 81;
 
@@ -72,4 +72,40 @@ export function applyDigitPlacement(
   const isComplete = arraysEqual(values, game.solution);
 
   return { ...game, values, notes, history, moveCount: game.moveCount + 1, isComplete };
+}
+
+/** Reconstructs the values/notes a history entry's cell (and its affected peers) had before it was recorded. */
+export function revertHistoryEntry(
+  game: GameState,
+  entry: HistoryEntry,
+): { values: number[]; notes: number[][] } {
+  const values = game.values.slice();
+  values[entry.index] = entry.prevValue;
+  const notes = game.notes.slice();
+  notes[entry.index] = entry.prevNotes;
+  for (const cleared of entry.clearedPeerNotes ?? []) {
+    notes[cleared.index] = cleared.prevNotes;
+  }
+  return { values, notes };
+}
+
+/**
+ * Clears every non-given cell whose value doesn't match the solution —
+ * used when Podpowiedzi is switched on, so any wrong digits left over from
+ * playing without hints don't sit there now visibly marked incorrect.
+ * Doesn't touch history/moveCount: this is a settings-driven cleanup, not a
+ * player move.
+ */
+export function clearIncorrectValues(game: GameState): GameState {
+  const values = game.values.slice();
+  let changed = false;
+  for (let i = 0; i < values.length; i++) {
+    if (game.givens[i] === 0 && values[i] !== 0 && values[i] !== game.solution[i]) {
+      values[i] = 0;
+      changed = true;
+    }
+  }
+  if (!changed) return game;
+  const isComplete = arraysEqual(values, game.solution);
+  return { ...game, values, isComplete };
 }

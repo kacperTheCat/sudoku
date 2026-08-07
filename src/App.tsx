@@ -26,6 +26,7 @@ function App() {
     erase,
     toggleNotesMode,
     undo,
+    clearIncorrectDigits,
     toggleShowRemaining,
     toggleColorAssists,
     toggleTheme,
@@ -66,6 +67,19 @@ function App() {
     setView('game');
   };
 
+  // Podpowiedzi is a single global setting shared by both save slots, so
+  // switching it on sweeps wrong digits out of whichever slot(s) have them —
+  // not just the one currently being played — so neither shows stale
+  // "incorrect but uncolored" leftovers next time it's opened.
+  const handleToggleColorAssists = () => {
+    const turningOn = !settings.colorAssists;
+    toggleColorAssists();
+    if (turningOn) {
+      clearIncorrectDigits();
+      daily.clearIncorrectDigits();
+    }
+  };
+
   const isDaily = mode === 'daily';
   const activeGame = isDaily ? daily.game : game;
 
@@ -100,7 +114,7 @@ function App() {
           onToggleNotes={isDaily ? daily.toggleNotesMode : toggleNotesMode}
           onUndo={isDaily ? daily.undo : undo}
           onToggleShowRemaining={toggleShowRemaining}
-          onToggleColorAssists={toggleColorAssists}
+          onToggleColorAssists={handleToggleColorAssists}
           onToggleTheme={toggleTheme}
           onPlayAgain={handleSelectDifficulty}
           onBackToMenu={() => setView('menu')}

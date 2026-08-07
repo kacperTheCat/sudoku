@@ -12,7 +12,14 @@ import {
 } from './storage';
 import { playCorrect, playIncorrect, playSuccess } from '../sudoku/sound';
 import { hapticCorrect, hapticIncorrect, hapticSuccess } from '../sudoku/haptics';
-import { CELL_COUNT, arraysEqual, applyCellChange, applyDigitPlacement } from './gameLogic';
+import {
+  CELL_COUNT,
+  arraysEqual,
+  applyCellChange,
+  applyDigitPlacement,
+  revertHistoryEntry,
+  clearIncorrectValues,
+} from './gameLogic';
 
 const CONFLICT_PULSE_MS = 450;
 
@@ -115,6 +122,8 @@ export function useDailyChallenge(colorAssists: boolean) {
       setGame(next);
 
       if (next !== game && next.values[index] !== 0) {
+        const isWrong = next.values[index] !== next.solution[index];
+
         if (colorAssists) {
           const duplicatePeers = PEERS[index].filter((p) => next.values[p] === next.values[index]);
           if (duplicatePeers.length > 0) {
@@ -122,6 +131,23 @@ export function useDailyChallenge(colorAssists: boolean) {
             setPulseCells([index, ...duplicatePeers]);
             pulseTimeoutRef.current = window.setTimeout(() => setPulseCells([]), CONFLICT_PULSE_MS);
           }
+        } else if (isWrong) {
+          // See useGame's setDigit for the rationale: hard mode still bounces
+          // out a flat-out wrong digit after a brief flash.
+          if (pulseTimeoutRef.current) window.clearTimeout(pulseTimeoutRef.current);
+          setPulseCells([index]);
+          pulseTimeoutRef.current = window.setTimeout(() => {
+            setPulseCells([]);
+            setGame((g) => {
+              if (!g || g.history.length === 0) return g;
+              const last = g.history[g.history.length - 1];
+              if (last.index !== index || g.values[index] !== digit) return g;
+              const history = g.history.slice(0, -1);
+              const { values, notes } = revertHistoryEntry(g, last);
+              const isComplete = arraysEqual(values, g.solution);
+              return { ...g, values, notes, history, isComplete };
+            });
+          }, CONFLICT_PULSE_MS);
         }
 
         if (next.isComplete) {
@@ -138,7 +164,7 @@ export function useDailyChallenge(colorAssists: boolean) {
             };
           });
         } else if (colorAssists) {
-          if (next.values[index] === next.solution[index]) {
+          if (!isWrong) {
             playCorrect();
             hapticCorrect();
           } else {
@@ -169,16 +195,14 @@ export function useDailyChallenge(colorAssists: boolean) {
       if (!g || g.history.length === 0) return g;
       const history = g.history.slice();
       const last = history.pop()!;
-      const values = g.values.slice();
-      values[last.index] = last.prevValue;
-      const notes = g.notes.slice();
-      notes[last.index] = last.prevNotes;
-      for (const cleared of last.clearedPeerNotes ?? []) {
-        notes[cleared.index] = cleared.prevNotes;
-      }
+      const { values, notes } = revertHistoryEntry(g, last);
       const isComplete = arraysEqual(values, g.solution);
       return { ...g, values, notes, history, selected: last.index, isComplete };
     });
+  }, []);
+
+  const clearIncorrectDigits = useCallback(() => {
+    setGame((g) => (g ? clearIncorrectValues(g) : g));
   }, []);
 
   return {
@@ -191,5 +215,6 @@ export function useDailyChallenge(colorAssists: boolean) {
     erase,
     toggleNotesMode,
     undo,
+    clearIncorrectDigits,
   };
 }

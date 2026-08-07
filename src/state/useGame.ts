@@ -5,7 +5,14 @@ import { PEERS, DIAGONAL_PEERS } from '../sudoku/solver';
 import { loadGame, saveGame, loadSettings, saveSettings, loadStats, saveStats } from './storage';
 import { playCorrect, playIncorrect, playSuccess } from '../sudoku/sound';
 import { hapticCorrect, hapticIncorrect, hapticSuccess } from '../sudoku/haptics';
-import { CELL_COUNT, arraysEqual, applyCellChange, applyDigitPlacement } from './gameLogic';
+import {
+  CELL_COUNT,
+  arraysEqual,
+  applyCellChange,
+  applyDigitPlacement,
+  revertHistoryEntry,
+  clearIncorrectValues,
+} from './gameLogic';
 
 const CONFLICT_PULSE_MS = 450;
 
@@ -110,6 +117,8 @@ export function useGame() {
       setGame(next);
 
       if (next !== game && next.values[index] !== 0) {
+        const isWrong = next.values[index] !== next.solution[index];
+
         if (settings.colorAssists) {
           const duplicatePeers = peers[index].filter((p) => next.values[p] === next.values[index]);
           if (duplicatePeers.length > 0) {
@@ -117,6 +126,25 @@ export function useGame() {
             setPulseCells([index, ...duplicatePeers]);
             pulseTimeoutRef.current = window.setTimeout(() => setPulseCells([]), CONFLICT_PULSE_MS);
           }
+        } else if (isWrong) {
+          // Hard mode: no color hints, but a flat-out wrong digit still
+          // can't stick — flash it briefly, then bounce it back out. Guarded
+          // against the cell having moved on (undo, a fix, notes toggle)
+          // before this timeout fires.
+          if (pulseTimeoutRef.current) window.clearTimeout(pulseTimeoutRef.current);
+          setPulseCells([index]);
+          pulseTimeoutRef.current = window.setTimeout(() => {
+            setPulseCells([]);
+            setGame((g) => {
+              if (!g || g.history.length === 0) return g;
+              const last = g.history[g.history.length - 1];
+              if (last.index !== index || g.values[index] !== digit) return g;
+              const history = g.history.slice(0, -1);
+              const { values, notes } = revertHistoryEntry(g, last);
+              const isComplete = arraysEqual(values, g.solution);
+              return { ...g, values, notes, history, isComplete };
+            });
+          }, CONFLICT_PULSE_MS);
         }
 
         // The win fanfare always plays — it's a one-time celebration, not a
@@ -143,7 +171,7 @@ export function useGame() {
             };
           });
         } else if (settings.colorAssists) {
-          if (next.values[index] === next.solution[index]) {
+          if (!isWrong) {
             playCorrect();
             hapticCorrect();
           } else {
@@ -174,18 +202,14 @@ export function useGame() {
       if (!g || g.history.length === 0) return g;
       const history = g.history.slice();
       const last = history.pop()!;
-      const values = g.values.slice();
-      values[last.index] = last.prevValue;
-      const notes = g.notes.slice();
-      notes[last.index] = last.prevNotes;
-      // Older saves may have history entries from before auto-clear-notes
-      // existed, so this field can be missing on them.
-      for (const cleared of last.clearedPeerNotes ?? []) {
-        notes[cleared.index] = cleared.prevNotes;
-      }
+      const { values, notes } = revertHistoryEntry(g, last);
       const isComplete = arraysEqual(values, g.solution);
       return { ...g, values, notes, history, selected: last.index, isComplete };
     });
+  }, []);
+
+  const clearIncorrectDigits = useCallback(() => {
+    setGame((g) => (g ? clearIncorrectValues(g) : g));
   }, []);
 
   const toggleShowRemaining = useCallback(() => {
@@ -212,6 +236,7 @@ export function useGame() {
     erase,
     toggleNotesMode,
     undo,
+    clearIncorrectDigits,
     toggleShowRemaining,
     toggleColorAssists,
     toggleTheme,
