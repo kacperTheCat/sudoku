@@ -5,7 +5,18 @@ function getContext(): AudioContext | null {
   const AudioContextCtor =
     window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
   if (!AudioContextCtor) return null;
-  if (!ctx) ctx = new AudioContextCtor();
+  if (!ctx) {
+    ctx = new AudioContextCtor();
+    // iOS Safari has a long-standing quirk where a freshly created context
+    // can stay effectively silent even after resume() resolves, unless a
+    // real source is actually started through it during the unlocking
+    // gesture — so play an inaudible one-sample buffer right away.
+    const silentBuffer = ctx.createBuffer(1, 1, ctx.sampleRate);
+    const silentSource = ctx.createBufferSource();
+    silentSource.buffer = silentBuffer;
+    silentSource.connect(ctx.destination);
+    silentSource.start(0);
+  }
   if (ctx.state === 'suspended') void ctx.resume();
   return ctx;
 }
