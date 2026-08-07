@@ -4,6 +4,7 @@ import { generatePuzzle } from '../sudoku/generator';
 import { PEERS, DIAGONAL_PEERS } from '../sudoku/solver';
 import { loadGame, saveGame, loadSettings, saveSettings, loadStats, saveStats } from './storage';
 import { playCorrect, playIncorrect, playSuccess } from '../sudoku/sound';
+import { hapticCorrect, hapticIncorrect, hapticSuccess } from '../sudoku/haptics';
 
 const CONFLICT_PULSE_MS = 450;
 
@@ -197,6 +198,7 @@ export function useGame() {
         // whenever game.isComplete is already true.
         if (next.isComplete) {
           playSuccess();
+          hapticSuccess();
           setStats((s) => {
             const prev = s[next.difficulty];
             return {
@@ -209,8 +211,13 @@ export function useGame() {
             };
           });
         } else if (settings.colorAssists) {
-          if (next.values[index] === next.solution[index]) playCorrect();
-          else playIncorrect();
+          if (next.values[index] === next.solution[index]) {
+            playCorrect();
+            hapticCorrect();
+          } else {
+            playIncorrect();
+            hapticIncorrect();
+          }
         }
       }
     },
