@@ -32,6 +32,7 @@ export function useGame(isActive: boolean) {
   const rippleTimeoutRef = useRef<number | undefined>(undefined);
   const [exhaustedDigit, setExhaustedDigit] = useState<number | null>(null);
   const exhaustedTimeoutRef = useRef<number | undefined>(undefined);
+  const [combo, setCombo] = useState(0);
 
   useEffect(() => {
     return () => {
@@ -95,6 +96,7 @@ export function useGame(isActive: boolean) {
       };
       setGame(fresh);
       setIsGenerating(false);
+      setCombo(0);
     }, 30);
   }, []);
 
@@ -143,6 +145,8 @@ export function useGame(isActive: boolean) {
 
         if (settings.colorAssists) {
           if (isWrong) {
+            setCombo(0);
+
             // Wrong digit can't stick while Podpowiedzi is on — flash it
             // briefly, then bounce it back out. Guarded against the cell
             // having moved on (undo, a fix, notes toggle) before this
@@ -171,6 +175,8 @@ export function useGame(isActive: boolean) {
               })),
             );
           } else {
+            setCombo((c) => c + 1);
+
             const duplicatePeers = peers[index].filter((p) => next.values[p] === next.values[index]);
             if (duplicatePeers.length > 0) {
               if (pulseTimeoutRef.current) window.clearTimeout(pulseTimeoutRef.current);
@@ -276,6 +282,10 @@ export function useGame(isActive: boolean) {
     setGame((g) => (g ? clearIncorrectValues(g) : g));
   }, []);
 
+  const resetCombo = useCallback(() => {
+    setCombo(0);
+  }, []);
+
   const toggleShowRemaining = useCallback(() => {
     setSettings((s) => ({ ...s, showRemaining: !s.showRemaining }));
   }, []);
@@ -296,6 +306,7 @@ export function useGame(isActive: boolean) {
     pulseCells,
     rippleCells,
     exhaustedDigit,
+    combo,
     newGame,
     selectCell,
     setDigit,
@@ -303,6 +314,7 @@ export function useGame(isActive: boolean) {
     toggleNotesMode,
     undo,
     clearIncorrectDigits,
+    resetCombo,
     toggleShowRemaining,
     toggleColorAssists,
     toggleTheme,

@@ -27,6 +27,7 @@ function App() {
     pulseCells,
     rippleCells,
     exhaustedDigit,
+    combo,
     newGame,
     selectCell,
     setDigit,
@@ -34,6 +35,7 @@ function App() {
     toggleNotesMode,
     undo,
     clearIncorrectDigits,
+    resetCombo,
     toggleShowRemaining,
     toggleColorAssists,
     toggleTheme,
@@ -86,6 +88,8 @@ function App() {
     if (turningOn) {
       clearIncorrectDigits();
       daily.clearIncorrectDigits();
+      resetCombo();
+      daily.resetCombo();
     }
   };
 
@@ -118,6 +122,7 @@ function App() {
           pulseCells={isDaily ? daily.pulseCells : pulseCells}
           rippleCells={isDaily ? daily.rippleCells : rippleCells}
           exhaustedDigit={isDaily ? daily.exhaustedDigit : exhaustedDigit}
+          combo={isDaily ? daily.combo : combo}
           isDaily={isDaily}
           onSelect={isDaily ? daily.selectCell : selectCell}
           onDigit={isDaily ? daily.setDigit : setDigit}

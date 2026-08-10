@@ -49,6 +49,7 @@ export function useDailyChallenge(colorAssists: boolean, isActive: boolean) {
   const rippleTimeoutRef = useRef<number | undefined>(undefined);
   const [exhaustedDigit, setExhaustedDigit] = useState<number | null>(null);
   const exhaustedTimeoutRef = useRef<number | undefined>(undefined);
+  const [combo, setCombo] = useState(0);
 
   useEffect(() => {
     return () => {
@@ -82,6 +83,7 @@ export function useDailyChallenge(colorAssists: boolean, isActive: boolean) {
       };
       setGame(fresh);
       setIsGenerating(false);
+      setCombo(0);
     }, 30);
     return () => window.clearTimeout(timer);
   }, []);
@@ -146,6 +148,8 @@ export function useDailyChallenge(colorAssists: boolean, isActive: boolean) {
 
         if (colorAssists) {
           if (isWrong) {
+            setCombo(0);
+
             // See useGame's setDigit for the rationale: a wrong digit can't
             // stick while Podpowiedzi is on — it flashes then bounces out.
             if (pulseTimeoutRef.current) window.clearTimeout(pulseTimeoutRef.current);
@@ -170,6 +174,8 @@ export function useDailyChallenge(colorAssists: boolean, isActive: boolean) {
               })),
             );
           } else {
+            setCombo((c) => c + 1);
+
             const duplicatePeers = PEERS[index].filter((p) => next.values[p] === next.values[index]);
             if (duplicatePeers.length > 0) {
               if (pulseTimeoutRef.current) window.clearTimeout(pulseTimeoutRef.current);
@@ -258,12 +264,17 @@ export function useDailyChallenge(colorAssists: boolean, isActive: boolean) {
     setGame((g) => (g ? clearIncorrectValues(g) : g));
   }, []);
 
+  const resetCombo = useCallback(() => {
+    setCombo(0);
+  }, []);
+
   return {
     game,
     isGenerating,
     pulseCells,
     rippleCells,
     exhaustedDigit,
+    combo,
     streak,
     selectCell,
     setDigit,
@@ -271,5 +282,6 @@ export function useDailyChallenge(colorAssists: boolean, isActive: boolean) {
     toggleNotesMode,
     undo,
     clearIncorrectDigits,
+    resetCombo,
   };
 }

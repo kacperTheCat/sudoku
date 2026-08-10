@@ -23,6 +23,7 @@ interface GameScreenProps {
   pulseCells: number[];
   rippleCells: RippleCell[];
   exhaustedDigit?: number | null;
+  combo?: number;
   isDaily?: boolean;
   onSelect: (index: number) => void;
   onDigit: (digit: number) => void;
@@ -43,6 +44,7 @@ export function GameScreen({
   pulseCells,
   rippleCells,
   exhaustedDigit,
+  combo = 0,
   isDaily = false,
   onSelect,
   onDigit,
@@ -95,6 +97,12 @@ export function GameScreen({
         <span className="game-screen__difficulty">
           {isDaily ? 'Wyzwanie dnia' : DIFFICULTY_LABELS[game.difficulty]}
           {game.variant === 'x' ? ' · X' : ''}
+          {settings.colorAssists && combo >= 2 && (
+            <span className="combo-badge" key={combo}>
+              {' '}
+              🔥{combo}x
+            </span>
+          )}
         </span>
         <div className="game-screen__header-end">
           <span className="game-screen__stats">
