@@ -174,15 +174,18 @@ export function useGame(isActive: boolean) {
               pulseTimeoutRef.current = window.setTimeout(() => setPulseCells([]), CONFLICT_PULSE_MS);
             }
 
-            // Correct digit: ripple all the way to the board edges, plus an
-            // 8-directional ripple through the box if this was its 9th cell.
-            const lineTargets = computeLineRipple(index, digit, next.values, false, RIPPLE_LINE_STEP_MS).map(
-              (t) => ({ ...t, kind: 'correct' as const }),
-            );
-            const boxTargets = boxComplete
+            // Correct digit: ripple along the row/column to the board
+            // edges — unless this was the box's 9th cell, in which case the
+            // contained 8-directional box ripple plays instead (not on top
+            // of it, so completing a box doesn't also spray a line ripple
+            // across the whole board).
+            const rippleTargets = boxComplete
               ? computeBoxRipple(index, RIPPLE_BOX_STEP_MS).map((t) => ({ ...t, kind: 'box' as const }))
-              : [];
-            triggerRipple([...lineTargets, ...boxTargets]);
+              : computeLineRipple(index, digit, next.values, false, RIPPLE_LINE_STEP_MS).map((t) => ({
+                  ...t,
+                  kind: 'correct' as const,
+                }));
+            triggerRipple(rippleTargets);
           }
         }
         // Podpowiedzi off: no pulse, no ripple, no auto-clear, no sound/

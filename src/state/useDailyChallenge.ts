@@ -173,13 +173,15 @@ export function useDailyChallenge(colorAssists: boolean, isActive: boolean) {
               pulseTimeoutRef.current = window.setTimeout(() => setPulseCells([]), CONFLICT_PULSE_MS);
             }
 
-            const lineTargets = computeLineRipple(index, digit, next.values, false, RIPPLE_LINE_STEP_MS).map(
-              (t) => ({ ...t, kind: 'correct' as const }),
-            );
-            const boxTargets = boxComplete
+            // Box's 9th cell plays the contained box ripple instead of the
+            // line ripple, not layered with it — see useGame's setDigit.
+            const rippleTargets = boxComplete
               ? computeBoxRipple(index, RIPPLE_BOX_STEP_MS).map((t) => ({ ...t, kind: 'box' as const }))
-              : [];
-            triggerRipple([...lineTargets, ...boxTargets]);
+              : computeLineRipple(index, digit, next.values, false, RIPPLE_LINE_STEP_MS).map((t) => ({
+                  ...t,
+                  kind: 'correct' as const,
+                }));
+            triggerRipple(rippleTargets);
           }
         }
         // Podpowiedzi off: nothing — wrong digits sit untouched until the
