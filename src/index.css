@@ -387,21 +387,25 @@ h2 {
 }
 
 /* Podpowiedzi only: appears once the streak of correct digits in a row
-   reaches 2, pops in fresh (via a remounting key) on every increment. */
+   reaches 2, pops in fresh (via a remounting key) on every increment —
+   scale is transform-based so the big overshoot never affects header
+   layout, only the resting 1.5em size does. */
 .combo-badge {
   display: inline-block;
+  transform-origin: center;
   color: var(--combo);
-  font-weight: 700;
-  animation: combo-pop 350ms ease-out;
+  font-weight: 800;
+  font-size: 1.5em;
+  animation: combo-pop 550ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @keyframes combo-pop {
   0% {
-    transform: scale(0.6);
+    transform: scale(0.5);
     opacity: 0;
   }
-  60% {
-    transform: scale(1.25);
+  30% {
+    transform: scale(2);
     opacity: 1;
   }
   100% {
