@@ -123,32 +123,37 @@ export function useGame(isActive: boolean) {
         const isWrong = next.values[index] !== next.solution[index];
 
         if (settings.colorAssists) {
-          const duplicatePeers = peers[index].filter((p) => next.values[p] === next.values[index]);
-          if (duplicatePeers.length > 0) {
+          if (isWrong) {
+            // Wrong digit can't stick while Podpowiedzi is on — flash it
+            // briefly, then bounce it back out. Guarded against the cell
+            // having moved on (undo, a fix, notes toggle) before this
+            // timeout fires.
             if (pulseTimeoutRef.current) window.clearTimeout(pulseTimeoutRef.current);
-            setPulseCells([index, ...duplicatePeers]);
-            pulseTimeoutRef.current = window.setTimeout(() => setPulseCells([]), CONFLICT_PULSE_MS);
+            setPulseCells([index]);
+            pulseTimeoutRef.current = window.setTimeout(() => {
+              setPulseCells([]);
+              setGame((g) => {
+                if (!g || g.history.length === 0) return g;
+                const last = g.history[g.history.length - 1];
+                if (last.index !== index || g.values[index] !== digit) return g;
+                const history = g.history.slice(0, -1);
+                const { values, notes } = revertHistoryEntry(g, last);
+                const isComplete = arraysEqual(values, g.solution);
+                return { ...g, values, notes, history, isComplete };
+              });
+            }, CONFLICT_PULSE_MS);
+          } else {
+            const duplicatePeers = peers[index].filter((p) => next.values[p] === next.values[index]);
+            if (duplicatePeers.length > 0) {
+              if (pulseTimeoutRef.current) window.clearTimeout(pulseTimeoutRef.current);
+              setPulseCells([index, ...duplicatePeers]);
+              pulseTimeoutRef.current = window.setTimeout(() => setPulseCells([]), CONFLICT_PULSE_MS);
+            }
           }
-        } else if (isWrong) {
-          // Hard mode: no color hints, but a flat-out wrong digit still
-          // can't stick — flash it briefly, then bounce it back out. Guarded
-          // against the cell having moved on (undo, a fix, notes toggle)
-          // before this timeout fires.
-          if (pulseTimeoutRef.current) window.clearTimeout(pulseTimeoutRef.current);
-          setPulseCells([index]);
-          pulseTimeoutRef.current = window.setTimeout(() => {
-            setPulseCells([]);
-            setGame((g) => {
-              if (!g || g.history.length === 0) return g;
-              const last = g.history[g.history.length - 1];
-              if (last.index !== index || g.values[index] !== digit) return g;
-              const history = g.history.slice(0, -1);
-              const { values, notes } = revertHistoryEntry(g, last);
-              const isComplete = arraysEqual(values, g.solution);
-              return { ...g, values, notes, history, isComplete };
-            });
-          }, CONFLICT_PULSE_MS);
         }
+        // Podpowiedzi off: no pulse, no auto-clear, no sound/haptic below —
+        // wrong digits just sit there untouched until the player notices
+        // themselves or switches Podpowiedzi back on (which sweeps them).
 
         // The win fanfare always plays — it's a one-time celebration, not a
         // per-digit hint, so it shouldn't be silenced by Podpowiedzi. This

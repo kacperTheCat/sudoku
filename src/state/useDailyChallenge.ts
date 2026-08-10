@@ -126,30 +126,34 @@ export function useDailyChallenge(colorAssists: boolean, isActive: boolean) {
         const isWrong = next.values[index] !== next.solution[index];
 
         if (colorAssists) {
-          const duplicatePeers = PEERS[index].filter((p) => next.values[p] === next.values[index]);
-          if (duplicatePeers.length > 0) {
+          if (isWrong) {
+            // See useGame's setDigit for the rationale: a wrong digit can't
+            // stick while Podpowiedzi is on — it flashes then bounces out.
             if (pulseTimeoutRef.current) window.clearTimeout(pulseTimeoutRef.current);
-            setPulseCells([index, ...duplicatePeers]);
-            pulseTimeoutRef.current = window.setTimeout(() => setPulseCells([]), CONFLICT_PULSE_MS);
+            setPulseCells([index]);
+            pulseTimeoutRef.current = window.setTimeout(() => {
+              setPulseCells([]);
+              setGame((g) => {
+                if (!g || g.history.length === 0) return g;
+                const last = g.history[g.history.length - 1];
+                if (last.index !== index || g.values[index] !== digit) return g;
+                const history = g.history.slice(0, -1);
+                const { values, notes } = revertHistoryEntry(g, last);
+                const isComplete = arraysEqual(values, g.solution);
+                return { ...g, values, notes, history, isComplete };
+              });
+            }, CONFLICT_PULSE_MS);
+          } else {
+            const duplicatePeers = PEERS[index].filter((p) => next.values[p] === next.values[index]);
+            if (duplicatePeers.length > 0) {
+              if (pulseTimeoutRef.current) window.clearTimeout(pulseTimeoutRef.current);
+              setPulseCells([index, ...duplicatePeers]);
+              pulseTimeoutRef.current = window.setTimeout(() => setPulseCells([]), CONFLICT_PULSE_MS);
+            }
           }
-        } else if (isWrong) {
-          // See useGame's setDigit for the rationale: hard mode still bounces
-          // out a flat-out wrong digit after a brief flash.
-          if (pulseTimeoutRef.current) window.clearTimeout(pulseTimeoutRef.current);
-          setPulseCells([index]);
-          pulseTimeoutRef.current = window.setTimeout(() => {
-            setPulseCells([]);
-            setGame((g) => {
-              if (!g || g.history.length === 0) return g;
-              const last = g.history[g.history.length - 1];
-              if (last.index !== index || g.values[index] !== digit) return g;
-              const history = g.history.slice(0, -1);
-              const { values, notes } = revertHistoryEntry(g, last);
-              const isComplete = arraysEqual(values, g.solution);
-              return { ...g, values, notes, history, isComplete };
-            });
-          }, CONFLICT_PULSE_MS);
         }
+        // Podpowiedzi off: nothing — wrong digits sit untouched until the
+        // player fixes them or switches Podpowiedzi back on (which sweeps them).
 
         if (next.isComplete) {
           playSuccess();
