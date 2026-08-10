@@ -140,6 +140,18 @@ export function playCorrect(): void {
   tone(880, 0.06, 0.12, 0.8, 'sine');
 }
 
+/**
+ * Brighter three-note sparkle for completing a 3x3 box — bigger than
+ * playCorrect's two-note blip, shorter than the full playSuccess fanfare.
+ * Replaces playCorrect (not layered with it) for the digit that completes
+ * the box.
+ */
+export function playBoxComplete(): void {
+  tone(784, 0, 0.1, 0.85, 'sine');
+  tone(988, 0.08, 0.12, 0.85, 'sine');
+  tone(1318, 0.16, 0.2, 0.85, 'sine');
+}
+
 /** Subtle but sharper buzz for an incorrectly placed digit. */
 export function playIncorrect(): void {
   tone(240, 0, 0.11, 0.85, 'sawtooth');

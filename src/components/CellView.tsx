@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react';
+
 interface CellViewProps {
   value: number;
   notes: number[];
@@ -8,6 +10,8 @@ interface CellViewProps {
   isDiagonal: boolean;
   status: 'correct' | 'incorrect' | undefined;
   isPulsing: boolean;
+  rippleKind?: 'correct' | 'wrong' | 'box';
+  rippleDelayMs?: number;
   rightEdge: boolean;
   bottomEdge: boolean;
   onSelect: () => void;
@@ -23,6 +27,8 @@ export function CellView({
   isDiagonal,
   status,
   isPulsing,
+  rippleKind,
+  rippleDelayMs,
   rightEdge,
   bottomEdge,
   onSelect,
@@ -44,12 +50,17 @@ export function CellView({
     !isSelected && isSameValue ? 'cell--same-value' : '',
     rightEdge ? 'cell--box-right' : '',
     bottomEdge ? 'cell--box-bottom' : '',
+    rippleKind ? `cell--ripple-${rippleKind}` : '',
   ]
     .filter(Boolean)
     .join(' ');
 
+  const style = rippleKind
+    ? ({ '--ripple-delay': `${rippleDelayMs ?? 0}ms` } as CSSProperties)
+    : undefined;
+
   return (
-    <button type="button" className={classes} onClick={onSelect}>
+    <button type="button" className={classes} style={style} onClick={onSelect}>
       {value !== 0 ? (
         <span className={`cell__value${isPulsing ? ' cell__value--pulse' : ''}`}>{value}</span>
       ) : notes.length > 0 ? (

@@ -25,6 +25,7 @@ function App() {
     stats,
     isGenerating,
     pulseCells,
+    rippleCells,
     newGame,
     selectCell,
     setDigit,
@@ -114,6 +115,7 @@ function App() {
           settings={settings}
           isGenerating={isDaily ? daily.isGenerating : isGenerating}
           pulseCells={isDaily ? daily.pulseCells : pulseCells}
+          rippleCells={isDaily ? daily.rippleCells : rippleCells}
           isDaily={isDaily}
           onSelect={isDaily ? daily.selectCell : selectCell}
           onDigit={isDaily ? daily.setDigit : setDigit}

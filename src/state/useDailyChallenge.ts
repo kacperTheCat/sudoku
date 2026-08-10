@@ -10,8 +10,8 @@ import {
   saveDailyStreak,
   type DailyStreak,
 } from './storage';
-import { playCorrect, playIncorrect, playSuccess } from '../sudoku/sound';
-import { hapticCorrect, hapticIncorrect, hapticSuccess } from '../sudoku/haptics';
+import { playCorrect, playIncorrect, playSuccess, playBoxComplete } from '../sudoku/sound';
+import { hapticCorrect, hapticIncorrect, hapticSuccess, hapticBoxComplete } from '../sudoku/haptics';
 import {
   CELL_COUNT,
   arraysEqual,
@@ -20,8 +20,12 @@ import {
   revertHistoryEntry,
   clearIncorrectValues,
 } from './gameLogic';
+import { computeLineRipple, computeBoxRipple, boxCells, type RippleCell } from '../sudoku/ripple';
 
 const CONFLICT_PULSE_MS = 450;
+const RIPPLE_LINE_STEP_MS = 35;
+const RIPPLE_BOX_STEP_MS = 45;
+const RIPPLE_ANIM_MS = 260;
 
 /**
  * One fixed-difficulty puzzle per calendar day, generated once and persisted
@@ -40,10 +44,13 @@ export function useDailyChallenge(colorAssists: boolean, isActive: boolean) {
   const [streak, setStreak] = useState<DailyStreak>(() => loadDailyStreak());
   const [pulseCells, setPulseCells] = useState<number[]>([]);
   const pulseTimeoutRef = useRef<number | undefined>(undefined);
+  const [rippleCells, setRippleCells] = useState<RippleCell[]>([]);
+  const rippleTimeoutRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     return () => {
       if (pulseTimeoutRef.current) window.clearTimeout(pulseTimeoutRef.current);
+      if (rippleTimeoutRef.current) window.clearTimeout(rippleTimeoutRef.current);
     };
   }, []);
 
@@ -124,6 +131,14 @@ export function useDailyChallenge(colorAssists: boolean, isActive: boolean) {
 
       if (next !== game && next.values[index] !== 0) {
         const isWrong = next.values[index] !== next.solution[index];
+        const boxComplete = !isWrong && boxCells(index).every((i) => next.values[i] !== 0);
+
+        const triggerRipple = (targets: RippleCell[]) => {
+          if (rippleTimeoutRef.current) window.clearTimeout(rippleTimeoutRef.current);
+          setRippleCells(targets);
+          const maxDelay = targets.reduce((m, t) => Math.max(m, t.delayMs), 0);
+          rippleTimeoutRef.current = window.setTimeout(() => setRippleCells([]), maxDelay + RIPPLE_ANIM_MS);
+        };
 
         if (colorAssists) {
           if (isWrong) {
@@ -143,6 +158,13 @@ export function useDailyChallenge(colorAssists: boolean, isActive: boolean) {
                 return { ...g, values, notes, history, isComplete };
               });
             }, CONFLICT_PULSE_MS);
+
+            triggerRipple(
+              computeLineRipple(index, digit, next.values, true, RIPPLE_LINE_STEP_MS).map((t) => ({
+                ...t,
+                kind: 'wrong' as const,
+              })),
+            );
           } else {
             const duplicatePeers = PEERS[index].filter((p) => next.values[p] === next.values[index]);
             if (duplicatePeers.length > 0) {
@@ -150,6 +172,14 @@ export function useDailyChallenge(colorAssists: boolean, isActive: boolean) {
               setPulseCells([index, ...duplicatePeers]);
               pulseTimeoutRef.current = window.setTimeout(() => setPulseCells([]), CONFLICT_PULSE_MS);
             }
+
+            const lineTargets = computeLineRipple(index, digit, next.values, false, RIPPLE_LINE_STEP_MS).map(
+              (t) => ({ ...t, kind: 'correct' as const }),
+            );
+            const boxTargets = boxComplete
+              ? computeBoxRipple(index, RIPPLE_BOX_STEP_MS).map((t) => ({ ...t, kind: 'box' as const }))
+              : [];
+            triggerRipple([...lineTargets, ...boxTargets]);
           }
         }
         // Podpowiedzi off: nothing — wrong digits sit untouched until the
@@ -169,12 +199,15 @@ export function useDailyChallenge(colorAssists: boolean, isActive: boolean) {
             };
           });
         } else if (colorAssists) {
-          if (!isWrong) {
-            playCorrect();
-            hapticCorrect();
-          } else {
+          if (isWrong) {
             playIncorrect();
             hapticIncorrect();
+          } else if (boxComplete) {
+            playBoxComplete();
+            hapticBoxComplete();
+          } else {
+            playCorrect();
+            hapticCorrect();
           }
         }
       }
@@ -214,6 +247,7 @@ export function useDailyChallenge(colorAssists: boolean, isActive: boolean) {
     game,
     isGenerating,
     pulseCells,
+    rippleCells,
     streak,
     selectCell,
     setDigit,

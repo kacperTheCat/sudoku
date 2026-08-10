@@ -15,6 +15,7 @@
   --same-value-bg: rgba(109, 40, 217, 0.1);
   --diagonal-bg: rgba(217, 119, 6, 0.07);
   --correct: #15803d;
+  --correct-bg: rgba(21, 128, 61, 0.16);
   --incorrect: #dc2626;
   --incorrect-bg: rgba(220, 38, 38, 0.12);
   --pulse: #ec4899;
@@ -46,6 +47,7 @@
     --same-value-bg: rgba(167, 139, 250, 0.14);
     --diagonal-bg: rgba(251, 191, 36, 0.09);
     --correct: #4ade80;
+    --correct-bg: rgba(74, 222, 128, 0.2);
     --incorrect: #f87171;
     --incorrect-bg: rgba(248, 113, 113, 0.18);
     --pulse: #f9a8d4;
@@ -70,6 +72,7 @@
   --same-value-bg: rgba(167, 139, 250, 0.14);
   --diagonal-bg: rgba(251, 191, 36, 0.09);
   --correct: #4ade80;
+  --correct-bg: rgba(74, 222, 128, 0.2);
   --incorrect: #f87171;
   --incorrect-bg: rgba(248, 113, 113, 0.18);
   --pulse: #f9a8d4;
@@ -494,6 +497,46 @@ h2 {
   }
   100% {
     transform: scale(1);
+  }
+}
+
+/* Ripple effects (Podpowiedzi only): a wave of cells lighting up in
+   sequence, staggered per-cell via the --ripple-delay custom property set
+   inline. .cell--ripple-box reuses the same green flash as the correct-digit
+   ripple — it's still a success cue, just shaped differently (radiating
+   through a 3x3 box instead of down a row/column). */
+.cell--ripple-correct,
+.cell--ripple-box {
+  animation: cell-ripple-correct 260ms ease-out;
+  animation-delay: var(--ripple-delay, 0ms);
+}
+
+.cell--ripple-wrong {
+  animation: cell-ripple-wrong 260ms ease-out;
+  animation-delay: var(--ripple-delay, 0ms);
+}
+
+@keyframes cell-ripple-correct {
+  0% {
+    background-color: transparent;
+  }
+  40% {
+    background-color: var(--correct-bg);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+@keyframes cell-ripple-wrong {
+  0% {
+    background-color: transparent;
+  }
+  40% {
+    background-color: var(--incorrect-bg);
+  }
+  100% {
+    background-color: transparent;
   }
 }
 

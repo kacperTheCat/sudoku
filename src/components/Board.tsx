@@ -1,5 +1,6 @@
 import { boxOf, colOf, rowOf, isOnMainDiagonal, isOnAntiDiagonal } from '../sudoku/solver';
 import type { Variant } from '../sudoku/types';
+import type { RippleCell } from '../sudoku/ripple';
 import { CellView } from './CellView';
 
 type CellStatus = 'correct' | 'incorrect' | undefined;
@@ -11,6 +12,7 @@ interface BoardProps {
   selected: number | null;
   cellStatus: CellStatus[];
   pulseCells: number[];
+  rippleCells: RippleCell[];
   variant: Variant;
   onSelect: (index: number) => void;
 }
@@ -22,9 +24,11 @@ export function Board({
   selected,
   cellStatus,
   pulseCells,
+  rippleCells,
   variant,
   onSelect,
 }: BoardProps) {
+  const rippleByIndex = new Map(rippleCells.map((r) => [r.index, r]));
   const selectedRow = selected !== null ? rowOf(selected) : -1;
   const selectedCol = selected !== null ? colOf(selected) : -1;
   const selectedBox = selected !== null ? boxOf(selected) : -1;
@@ -47,6 +51,7 @@ export function Board({
             boxOf(index) === selectedBox ||
             isDiagonalPeer);
         const isSameValue = !isSelected && selectedValue !== 0 && value === selectedValue;
+        const ripple = rippleByIndex.get(index);
 
         return (
           <CellView
@@ -60,6 +65,8 @@ export function Board({
             isDiagonal={onDiagonal}
             status={cellStatus[index]}
             isPulsing={pulseCells.includes(index)}
+            rippleKind={ripple?.kind}
+            rippleDelayMs={ripple?.delayMs}
             rightEdge={colOf(index) === 2 || colOf(index) === 5}
             bottomEdge={rowOf(index) === 2 || rowOf(index) === 5}
             onSelect={() => onSelect(index)}

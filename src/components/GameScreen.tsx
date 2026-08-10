@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import type { Difficulty, GameState, Settings, Variant } from '../sudoku/types';
+import type { RippleCell } from '../sudoku/ripple';
 import { DIFFICULTY_LABELS } from '../sudoku/generator';
 import { Board } from './Board';
 import { NumberPad } from './NumberPad';
@@ -20,6 +21,7 @@ interface GameScreenProps {
   settings: Settings;
   isGenerating: boolean;
   pulseCells: number[];
+  rippleCells: RippleCell[];
   isDaily?: boolean;
   onSelect: (index: number) => void;
   onDigit: (digit: number) => void;
@@ -38,6 +40,7 @@ export function GameScreen({
   settings,
   isGenerating,
   pulseCells,
+  rippleCells,
   isDaily = false,
   onSelect,
   onDigit,
@@ -110,6 +113,7 @@ export function GameScreen({
           selected={game.selected}
           cellStatus={cellStatus}
           pulseCells={pulseCells}
+          rippleCells={rippleCells}
           variant={game.variant}
           onSelect={onSelect}
         />
