@@ -22,6 +22,7 @@ interface GameScreenProps {
   isGenerating: boolean;
   pulseCells: number[];
   rippleCells: RippleCell[];
+  exhaustedDigit?: number | null;
   isDaily?: boolean;
   onSelect: (index: number) => void;
   onDigit: (digit: number) => void;
@@ -41,6 +42,7 @@ export function GameScreen({
   isGenerating,
   pulseCells,
   rippleCells,
+  exhaustedDigit,
   isDaily = false,
   onSelect,
   onDigit,
@@ -124,6 +126,7 @@ export function GameScreen({
           colorAssists={settings.colorAssists}
           notesMode={game.notesMode}
           canUndo={game.history.length > 0}
+          exhaustedDigit={exhaustedDigit}
           onDigit={onDigit}
           onErase={onErase}
           onToggleNotes={onToggleNotes}

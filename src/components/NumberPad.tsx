@@ -4,6 +4,7 @@ interface NumberPadProps {
   colorAssists: boolean;
   notesMode: boolean;
   canUndo: boolean;
+  exhaustedDigit?: number | null;
   onDigit: (digit: number) => void;
   onErase: () => void;
   onToggleNotes: () => void;
@@ -20,6 +21,7 @@ export function NumberPad({
   colorAssists,
   notesMode,
   canUndo,
+  exhaustedDigit,
   onDigit,
   onErase,
   onToggleNotes,
@@ -36,7 +38,7 @@ export function NumberPad({
             <button
               key={digit}
               type="button"
-              className="number-pad__digit"
+              className={`number-pad__digit${digit === exhaustedDigit ? ' number-pad__digit--exhausted' : ''}`}
               disabled={left <= 0}
               onClick={() => onDigit(digit)}
               {...(colorAssists ? { 'data-skip-click-sound': true } : {})}

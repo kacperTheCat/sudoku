@@ -26,6 +26,7 @@ function App() {
     isGenerating,
     pulseCells,
     rippleCells,
+    exhaustedDigit,
     newGame,
     selectCell,
     setDigit,
@@ -116,6 +117,7 @@ function App() {
           isGenerating={isDaily ? daily.isGenerating : isGenerating}
           pulseCells={isDaily ? daily.pulseCells : pulseCells}
           rippleCells={isDaily ? daily.rippleCells : rippleCells}
+          exhaustedDigit={isDaily ? daily.exhaustedDigit : exhaustedDigit}
           isDaily={isDaily}
           onSelect={isDaily ? daily.selectCell : selectCell}
           onDigit={isDaily ? daily.setDigit : setDigit}

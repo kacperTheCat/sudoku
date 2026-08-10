@@ -26,6 +26,7 @@ const CONFLICT_PULSE_MS = 450;
 const RIPPLE_LINE_STEP_MS = 35;
 const RIPPLE_BOX_STEP_MS = 45;
 const RIPPLE_ANIM_MS = 260;
+const DIGIT_EXHAUSTED_MS = 500;
 
 /**
  * One fixed-difficulty puzzle per calendar day, generated once and persisted
@@ -46,11 +47,14 @@ export function useDailyChallenge(colorAssists: boolean, isActive: boolean) {
   const pulseTimeoutRef = useRef<number | undefined>(undefined);
   const [rippleCells, setRippleCells] = useState<RippleCell[]>([]);
   const rippleTimeoutRef = useRef<number | undefined>(undefined);
+  const [exhaustedDigit, setExhaustedDigit] = useState<number | null>(null);
+  const exhaustedTimeoutRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     return () => {
       if (pulseTimeoutRef.current) window.clearTimeout(pulseTimeoutRef.current);
       if (rippleTimeoutRef.current) window.clearTimeout(rippleTimeoutRef.current);
+      if (exhaustedTimeoutRef.current) window.clearTimeout(exhaustedTimeoutRef.current);
     };
   }, []);
 
@@ -182,6 +186,15 @@ export function useDailyChallenge(colorAssists: boolean, isActive: boolean) {
                   kind: 'correct' as const,
                 }));
             triggerRipple(rippleTargets);
+
+            if (next.values.filter((v) => v === digit).length === 9) {
+              if (exhaustedTimeoutRef.current) window.clearTimeout(exhaustedTimeoutRef.current);
+              setExhaustedDigit(digit);
+              exhaustedTimeoutRef.current = window.setTimeout(
+                () => setExhaustedDigit(null),
+                DIGIT_EXHAUSTED_MS,
+              );
+            }
           }
         }
         // Podpowiedzi off: nothing — wrong digits sit untouched until the
@@ -250,6 +263,7 @@ export function useDailyChallenge(colorAssists: boolean, isActive: boolean) {
     isGenerating,
     pulseCells,
     rippleCells,
+    exhaustedDigit,
     streak,
     selectCell,
     setDigit,

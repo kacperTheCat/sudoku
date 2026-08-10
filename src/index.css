@@ -576,7 +576,7 @@ h2 {
 .number-pad__digit {
   position: relative;
   overflow: visible;
-  aspect-ratio: 1;
+  aspect-ratio: 4 / 5;
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--text);
@@ -593,6 +593,29 @@ h2 {
 .number-pad__digit:disabled {
   opacity: 0.35;
   cursor: default;
+}
+
+/* Podpowiedzi only: plays once, the moment the 9th (last) instance of a
+   digit is correctly placed and its button becomes disabled. */
+.number-pad__digit--exhausted {
+  animation: digit-exhausted 500ms ease-out;
+}
+
+@keyframes digit-exhausted {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  35% {
+    transform: scale(1.3);
+    background: var(--correct-bg);
+    color: var(--correct);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.35;
+  }
 }
 
 .number-pad__badge {
