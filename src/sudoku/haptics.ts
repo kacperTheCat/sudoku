@@ -14,8 +14,8 @@ export function hapticCorrect(): void {
   vibrate(15);
 }
 
-/** Between hapticCorrect and hapticSuccess in weight, for completing a box. */
-export function hapticBoxComplete(): void {
+/** Between hapticCorrect and hapticSuccess in weight, for completing a row/column/box. */
+export function hapticUnitComplete(): void {
   vibrate([15, 30, 25]);
 }
 

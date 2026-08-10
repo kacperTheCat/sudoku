@@ -529,11 +529,12 @@ h2 {
 
 /* Ripple effects (Podpowiedzi only): a wave of cells lighting up in
    sequence, staggered per-cell via the --ripple-delay custom property set
-   inline. .cell--ripple-box reuses the same green flash as the correct-digit
-   ripple — it's still a success cue, just shaped differently (radiating
-   through a 3x3 box instead of down a row/column). */
+   inline. .cell--ripple-box/-column reuse the same green flash as the
+   correct-digit ripple — still a success cue, just shaped differently
+   (radiating through a 3x3 box or a full column instead of a row+column). */
 .cell--ripple-correct,
-.cell--ripple-box {
+.cell--ripple-box,
+.cell--ripple-column {
   animation: cell-ripple-correct 260ms ease-out;
   animation-delay: var(--ripple-delay, 0ms);
 }

@@ -10,8 +10,8 @@ import {
   saveDailyStreak,
   type DailyStreak,
 } from './storage';
-import { playCorrect, playIncorrect, playSuccess, playBoxComplete } from '../sudoku/sound';
-import { hapticCorrect, hapticIncorrect, hapticSuccess, hapticBoxComplete } from '../sudoku/haptics';
+import { playCorrect, playIncorrect, playSuccess, playUnitComplete } from '../sudoku/sound';
+import { hapticCorrect, hapticIncorrect, hapticSuccess, hapticUnitComplete } from '../sudoku/haptics';
 import {
   CELL_COUNT,
   arraysEqual,
@@ -20,11 +20,19 @@ import {
   revertHistoryEntry,
   clearIncorrectValues,
 } from './gameLogic';
-import { computeLineRipple, computeBoxRipple, boxCells, type RippleCell } from '../sudoku/ripple';
+import {
+  computeLineRipple,
+  computeBoxRipple,
+  computeColumnRipple,
+  boxCells,
+  columnCells,
+  type RippleCell,
+} from '../sudoku/ripple';
 
 const CONFLICT_PULSE_MS = 450;
 const RIPPLE_LINE_STEP_MS = 35;
 const RIPPLE_BOX_STEP_MS = 45;
+const RIPPLE_COLUMN_STEP_MS = 35;
 const RIPPLE_ANIM_MS = 260;
 const DIGIT_EXHAUSTED_MS = 500;
 
@@ -138,6 +146,7 @@ export function useDailyChallenge(colorAssists: boolean, isActive: boolean) {
       if (next !== game && next.values[index] !== 0) {
         const isWrong = next.values[index] !== next.solution[index];
         const boxComplete = !isWrong && boxCells(index).every((i) => next.values[i] !== 0);
+        const columnComplete = !isWrong && columnCells(index).every((i) => next.values[i] !== 0);
 
         const triggerRipple = (targets: RippleCell[]) => {
           if (rippleTimeoutRef.current) window.clearTimeout(rippleTimeoutRef.current);
@@ -183,14 +192,30 @@ export function useDailyChallenge(colorAssists: boolean, isActive: boolean) {
               pulseTimeoutRef.current = window.setTimeout(() => setPulseCells([]), CONFLICT_PULSE_MS);
             }
 
-            // Box's 9th cell plays the contained box ripple instead of the
-            // line ripple, not layered with it — see useGame's setDigit.
-            const rippleTargets = boxComplete
-              ? computeBoxRipple(index, RIPPLE_BOX_STEP_MS).map((t) => ({ ...t, kind: 'box' as const }))
-              : computeLineRipple(index, digit, next.values, false, RIPPLE_LINE_STEP_MS).map((t) => ({
-                  ...t,
-                  kind: 'correct' as const,
-                }));
+            // Completing the box and/or column plays the contained
+            // ripple(s) for whichever unit(s) it completed instead of the
+            // line ripple, not layered on top — see useGame's setDigit.
+            let rippleTargets: RippleCell[];
+            if (boxComplete || columnComplete) {
+              rippleTargets = [];
+              if (boxComplete) {
+                rippleTargets.push(
+                  ...computeBoxRipple(index, RIPPLE_BOX_STEP_MS).map((t) => ({ ...t, kind: 'box' as const })),
+                );
+              }
+              if (columnComplete) {
+                rippleTargets.push(
+                  ...computeColumnRipple(index, RIPPLE_COLUMN_STEP_MS).map((t) => ({
+                    ...t,
+                    kind: 'column' as const,
+                  })),
+                );
+              }
+            } else {
+              rippleTargets = computeLineRipple(index, digit, next.values, false, RIPPLE_LINE_STEP_MS).map(
+                (t) => ({ ...t, kind: 'correct' as const }),
+              );
+            }
             triggerRipple(rippleTargets);
 
             if (next.values.filter((v) => v === digit).length === 9) {
@@ -223,9 +248,9 @@ export function useDailyChallenge(colorAssists: boolean, isActive: boolean) {
           if (isWrong) {
             playIncorrect();
             hapticIncorrect();
-          } else if (boxComplete) {
-            playBoxComplete();
-            hapticBoxComplete();
+          } else if (boxComplete || columnComplete) {
+            playUnitComplete();
+            hapticUnitComplete();
           } else {
             playCorrect();
             hapticCorrect();

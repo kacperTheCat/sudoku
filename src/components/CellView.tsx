@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import type { RippleKind } from '../sudoku/ripple';
 
 interface CellViewProps {
   value: number;
@@ -10,7 +11,7 @@ interface CellViewProps {
   isDiagonal: boolean;
   status: 'correct' | 'incorrect' | undefined;
   isPulsing: boolean;
-  rippleKind?: 'correct' | 'wrong' | 'box';
+  rippleKind?: RippleKind;
   rippleDelayMs?: number;
   rightEdge: boolean;
   bottomEdge: boolean;

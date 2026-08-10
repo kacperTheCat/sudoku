@@ -1,6 +1,6 @@
 import { rowOf, colOf } from './solver';
 
-export type RippleKind = 'correct' | 'wrong' | 'box';
+export type RippleKind = 'correct' | 'wrong' | 'box' | 'column';
 
 export interface RippleCell {
   index: number;
@@ -75,6 +75,26 @@ export function computeBoxRipple(index: number, stepMs: number): { index: number
     if (i === index) continue;
     const distance = Math.max(Math.abs(rowOf(i) - row), Math.abs(colOf(i) - col));
     targets.push({ index: i, delayMs: distance * stepMs });
+  }
+  return targets;
+}
+
+/** The 9 cell indices of the column containing `index`. */
+export function columnCells(index: number): number[] {
+  const col = colOf(index);
+  const cells: number[] = [];
+  for (let r = 0; r < 9; r++) cells.push(r * 9 + col);
+  return cells;
+}
+
+/** The other 8 cells of `index`'s column, tagged by row distance — radiates up and down from it. */
+export function computeColumnRipple(index: number, stepMs: number): { index: number; delayMs: number }[] {
+  const row = rowOf(index);
+  const col = colOf(index);
+  const targets: { index: number; delayMs: number }[] = [];
+  for (let r = 0; r < 9; r++) {
+    if (r === row) continue;
+    targets.push({ index: r * 9 + col, delayMs: Math.abs(r - row) * stepMs });
   }
   return targets;
 }

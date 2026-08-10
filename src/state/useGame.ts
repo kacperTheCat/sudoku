@@ -3,8 +3,8 @@ import type { Difficulty, GameState, Settings, Stats, Variant } from '../sudoku/
 import { generatePuzzle } from '../sudoku/generator';
 import { PEERS, DIAGONAL_PEERS } from '../sudoku/solver';
 import { loadGame, saveGame, loadSettings, saveSettings, loadStats, saveStats } from './storage';
-import { playCorrect, playIncorrect, playSuccess, playBoxComplete } from '../sudoku/sound';
-import { hapticCorrect, hapticIncorrect, hapticSuccess, hapticBoxComplete } from '../sudoku/haptics';
+import { playCorrect, playIncorrect, playSuccess, playUnitComplete } from '../sudoku/sound';
+import { hapticCorrect, hapticIncorrect, hapticSuccess, hapticUnitComplete } from '../sudoku/haptics';
 import {
   CELL_COUNT,
   arraysEqual,
@@ -13,11 +13,19 @@ import {
   revertHistoryEntry,
   clearIncorrectValues,
 } from './gameLogic';
-import { computeLineRipple, computeBoxRipple, boxCells, type RippleCell } from '../sudoku/ripple';
+import {
+  computeLineRipple,
+  computeBoxRipple,
+  computeColumnRipple,
+  boxCells,
+  columnCells,
+  type RippleCell,
+} from '../sudoku/ripple';
 
 const CONFLICT_PULSE_MS = 450;
 const RIPPLE_LINE_STEP_MS = 35;
 const RIPPLE_BOX_STEP_MS = 45;
+const RIPPLE_COLUMN_STEP_MS = 35;
 const RIPPLE_ANIM_MS = 260;
 const DIGIT_EXHAUSTED_MS = 500;
 
@@ -135,6 +143,7 @@ export function useGame(isActive: boolean) {
       if (next !== game && next.values[index] !== 0) {
         const isWrong = next.values[index] !== next.solution[index];
         const boxComplete = !isWrong && boxCells(index).every((i) => next.values[i] !== 0);
+        const columnComplete = !isWrong && columnCells(index).every((i) => next.values[i] !== 0);
 
         const triggerRipple = (targets: RippleCell[]) => {
           if (rippleTimeoutRef.current) window.clearTimeout(rippleTimeoutRef.current);
@@ -184,17 +193,34 @@ export function useGame(isActive: boolean) {
               pulseTimeoutRef.current = window.setTimeout(() => setPulseCells([]), CONFLICT_PULSE_MS);
             }
 
-            // Correct digit: ripple along the row/column to the board
-            // edges — unless this was the box's 9th cell, in which case the
-            // contained 8-directional box ripple plays instead (not on top
-            // of it, so completing a box doesn't also spray a line ripple
-            // across the whole board).
-            const rippleTargets = boxComplete
-              ? computeBoxRipple(index, RIPPLE_BOX_STEP_MS).map((t) => ({ ...t, kind: 'box' as const }))
-              : computeLineRipple(index, digit, next.values, false, RIPPLE_LINE_STEP_MS).map((t) => ({
-                  ...t,
-                  kind: 'correct' as const,
-                }));
+            // Correct digit: ripple along the row/column to the board edges
+            // — unless this was the 9th cell of its box and/or column, in
+            // which case the contained ripple(s) for whichever unit(s) it
+            // completed play instead (not layered on top of the line
+            // ripple, so completing a unit doesn't also spray a ripple
+            // across the whole board). Both can fire together on the rare
+            // placement that completes a box and its column at once.
+            let rippleTargets: RippleCell[];
+            if (boxComplete || columnComplete) {
+              rippleTargets = [];
+              if (boxComplete) {
+                rippleTargets.push(
+                  ...computeBoxRipple(index, RIPPLE_BOX_STEP_MS).map((t) => ({ ...t, kind: 'box' as const })),
+                );
+              }
+              if (columnComplete) {
+                rippleTargets.push(
+                  ...computeColumnRipple(index, RIPPLE_COLUMN_STEP_MS).map((t) => ({
+                    ...t,
+                    kind: 'column' as const,
+                  })),
+                );
+              }
+            } else {
+              rippleTargets = computeLineRipple(index, digit, next.values, false, RIPPLE_LINE_STEP_MS).map(
+                (t) => ({ ...t, kind: 'correct' as const }),
+              );
+            }
             triggerRipple(rippleTargets);
 
             // All 9 instances of this digit are now on the board — flash
@@ -241,9 +267,9 @@ export function useGame(isActive: boolean) {
           if (isWrong) {
             playIncorrect();
             hapticIncorrect();
-          } else if (boxComplete) {
-            playBoxComplete();
-            hapticBoxComplete();
+          } else if (boxComplete || columnComplete) {
+            playUnitComplete();
+            hapticUnitComplete();
           } else {
             playCorrect();
             hapticCorrect();
