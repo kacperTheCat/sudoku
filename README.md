@@ -22,4 +22,9 @@ npm run preview
 
 ## Deploy
 
-Push na branch `main` uruchamia `.github/workflows/deploy.yml`, który buduje projekt i publikuje go na GitHub Pages (wymaga włączenia w ustawieniach repo: **Settings → Pages → Source: GitHub Actions**).
+Push na branch `main` uruchamia `.github/workflows/deploy.yml`, który buduje projekt i publikuje go na GitHub Pages (wymaga włączenia w ustawieniach repo: **Settings → Pages → Source: GitHub Actions**). Równolegle podłączony jest Vercel (przez UI Vercela).
+
+## Dokumentacja
+
+- [`docs/LOGIKA_BIZNESOWA.md`](docs/LOGIKA_BIZNESOWA.md) — zasady gry i zachowanie aplikacji z perspektywy gracza.
+- [`docs/ARCHITEKTURA.md`](docs/ARCHITEKTURA.md) — struktura kodu, wzorce, decyzje techniczne.
