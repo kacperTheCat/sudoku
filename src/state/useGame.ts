@@ -140,6 +140,16 @@ export function useGame(isActive: boolean) {
       const next = applyDigitPlacement(game, index, digit, peers);
       setGame(next);
 
+      if (next !== game && next.values[index] === 0) {
+        // Toggled the same digit off, clearing the cell. If it held a
+        // correct digit, the combo streak must not survive its removal —
+        // otherwise repeatedly toggling one cell on/off would farm combo
+        // for free without solving anything new.
+        if (game.values[index] === game.solution[index]) {
+          setCombo(0);
+        }
+      }
+
       if (next !== game && next.values[index] !== 0) {
         const isWrong = next.values[index] !== next.solution[index];
         const boxComplete = !isWrong && boxCells(index).every((i) => next.values[i] !== 0);
@@ -280,29 +290,38 @@ export function useGame(isActive: boolean) {
     [game, settings.colorAssists],
   );
 
+  // Closure-read (see setDigit above) so the combo-reset check below fires
+  // exactly once per click, not doubled by Strict Mode.
   const erase = useCallback(() => {
-    setGame((g) => {
-      if (!g || g.selected === null) return g;
-      const index = g.selected;
-      if (g.givens[index] !== 0) return g;
-      return applyCellChange(g, index, () => ({ value: 0, notes: [] }));
-    });
-  }, []);
+    if (!game || game.selected === null) return;
+    const index = game.selected;
+    if (game.givens[index] !== 0) return;
+    // Erasing a correct digit must drop the combo streak too — otherwise
+    // Wyczyść + re-entering the same digit would farm combo just like
+    // toggling it off and on again.
+    if (game.values[index] === game.solution[index]) {
+      setCombo(0);
+    }
+    setGame(applyCellChange(game, index, () => ({ value: 0, notes: [] })));
+  }, [game]);
 
   const toggleNotesMode = useCallback(() => {
     setGame((g) => (g ? { ...g, notesMode: !g.notesMode } : g));
   }, []);
 
   const undo = useCallback(() => {
-    setGame((g) => {
-      if (!g || g.history.length === 0) return g;
-      const history = g.history.slice();
-      const last = history.pop()!;
-      const { values, notes } = revertHistoryEntry(g, last);
-      const isComplete = arraysEqual(values, g.solution);
-      return { ...g, values, notes, history, selected: last.index, isComplete };
-    });
-  }, []);
+    if (!game || game.history.length === 0) return;
+    const history = game.history.slice();
+    const last = history.pop()!;
+    // Undoing a correct digit must drop the combo streak too — otherwise
+    // Cofnij + re-entering the same digit would farm combo the same way.
+    if (game.values[last.index] === game.solution[last.index]) {
+      setCombo(0);
+    }
+    const { values, notes } = revertHistoryEntry(game, last);
+    const isComplete = arraysEqual(values, game.solution);
+    setGame({ ...game, values, notes, history, selected: last.index, isComplete });
+  }, [game]);
 
   const clearIncorrectDigits = useCallback(() => {
     setGame((g) => (g ? clearIncorrectValues(g) : g));
