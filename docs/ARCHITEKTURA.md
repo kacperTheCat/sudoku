@@ -153,6 +153,18 @@ Skrypt inline w `index.html` ustawia `data-theme` **przed pierwszym renderem** (
 
 Animacje fal (`cell-ripple-correct`, `cell-ripple-wrong`) i combo (`combo-pop`) korzystają z `animation-delay` sterowanego przez inline custom property, żeby dynamicznie obliczone w JS opóźnienie mogło wpływać na czysto deklaratywną animację CSS bez generowania osobnych klas per-opóźnienie.
 
+## Testy
+
+Testy jednostkowe przez **Vitest** (`npm run test` / `npm run test:watch`), skonfigurowane bezpośrednio w `vite.config.ts` (`import { defineConfig } from 'vitest/config'` zamiast z `'vite'` — to reeksport z dodanym typowaniem pola `test`, jeden plik konfiguracyjny wystarcza dla obu). Środowisko `node` (nie `jsdom`) — zakres celowo ograniczony do czystej logiki, żadnych testów komponentów React:
+
+- `solver.test.ts` — matematyka indeksów, PEERS/DIAGONAL_PEERS, walidacja, `countSolutions`.
+- `generator.test.ts` — generator produkuje pełne, poprawne plansze i puzzle z unikalnym rozwiązaniem dla każdego poziomu trudności i obu wariantów.
+- `ripple.test.ts` — dokładna matematyka opóźnień fal (linia, kwadrat, kolumna), w tym zatrzymywanie się na duplikacie.
+- `gameLogic.test.ts` — mutacje `GameState`: wstawianie/cofanie, czyszczenie notatek sąsiadów, `clearIncorrectValues`.
+- `storage.test.ts` — round-trip przez `localStorage` (mockowany prostym in-memory `Storage`, bez jsdom) oraz explicit regression test na scalanie per-poziom w `loadStats` (to był realny bug naprawiony wcześniej — shallow merge nadpisywał całe `stats.easy` starym kształtem obiektu).
+
+Pliki testowe leżą obok testowanego kodu (`*.test.ts`) i są objęte przez `tsconfig.app.json` (`include: ["src"]`), więc błędy typów w testach też wywalają `npm run build`. Nie trafiają jednak do zbudowanego bundla — `vite build` idzie od `main.tsx`, który ich nie importuje.
+
 ## Znane pułapki i decyzje warte zapamiętania
 
 - **Domknięcie zamiast funkcyjnego `setState`** w `setDigit` (patrz wyżej) — celowe, nie przeoczenie.

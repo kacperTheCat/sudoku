@@ -20,6 +20,15 @@ npm run build
 npm run preview
 ```
 
+## Testy
+
+```bash
+npm run test        # jednorazowo
+npm run test:watch  # tryb watch
+```
+
+Testy jednostkowe (Vitest) pokrywają czystą logikę: generator/solver sudoku, mutacje stanu gry, animacje fal i persystencję w `localStorage` — bez testów komponentów React.
+
 ## Deploy
 
 Push na branch `main` uruchamia `.github/workflows/deploy.yml`, który buduje projekt i publikuje go na GitHub Pages (wymaga włączenia w ustawieniach repo: **Settings → Pages → Source: GitHub Actions**). Równolegle podłączony jest Vercel (przez UI Vercela).

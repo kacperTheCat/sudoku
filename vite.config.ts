@@ -1,4 +1,6 @@
-import { defineConfig } from 'vite';
+// `vitest/config`'s defineConfig re-exports Vite's, just with the `test`
+// field typed too — lets this stay a single config file for both.
+import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
@@ -7,6 +9,11 @@ import { VitePWA } from 'vite-plugin-pwa';
 // repo name.
 export default defineConfig({
   base: './',
+  test: {
+    // Pure-logic unit tests only (sudoku engine, state mutations, storage)
+    // — no React component tests, so no jsdom environment needed.
+    environment: 'node',
+  },
   plugins: [
     react(),
     VitePWA({
