@@ -91,6 +91,11 @@ export function MenuScreen({
         onClick={onStartDaily}
         data-sound="transition"
       >
+        {dailyStreak.longestStreak > 0 && (
+          <span className="menu-screen__trophy-badge" aria-label={`Rekord: ${dailyStreak.longestStreak} dni z rzędu`}>
+            🏆 {dailyStreak.longestStreak}
+          </span>
+        )}
         <span>Wyzwanie dnia{dailyCompletedToday ? ' ✓' : ''}</span>
         <span className="menu-screen__daily-meta">
           {dailyStreak.currentStreak > 0
