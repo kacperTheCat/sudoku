@@ -11,9 +11,10 @@ export function loadGame(): GameState | null {
     const raw = localStorage.getItem(GAME_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<GameState>;
-    // Older saves (pre move-tracking) lack moveCount — default it in rather
-    // than let it stay undefined and poison the +1 arithmetic in applyCellChange.
-    return { moveCount: 0, ...parsed } as GameState;
+    // Older saves lack fields added later (moveCount, mistakeCount) —
+    // default them in rather than let them stay undefined and poison the
+    // +1 arithmetic in gameLogic.ts.
+    return { moveCount: 0, mistakeCount: 0, ...parsed } as GameState;
   } catch {
     return null;
   }
@@ -102,7 +103,7 @@ export function loadDailyGame(): StoredDailyGame | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as { date?: string; game?: Partial<GameState> };
     if (!parsed.date || !parsed.game) return null;
-    return { date: parsed.date, game: { moveCount: 0, ...parsed.game } as GameState };
+    return { date: parsed.date, game: { moveCount: 0, mistakeCount: 0, ...parsed.game } as GameState };
   } catch {
     return null;
   }

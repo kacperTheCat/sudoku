@@ -86,6 +86,7 @@ export function useDailyChallenge(colorAssists: boolean, isActive: boolean) {
         notesMode: false,
         elapsedSeconds: 0,
         moveCount: 0,
+        mistakeCount: 0,
         isComplete: false,
         startedAt: Date.now(),
       };

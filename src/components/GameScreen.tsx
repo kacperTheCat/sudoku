@@ -149,6 +149,7 @@ export function GameScreen({
           difficulty={game.difficulty}
           seconds={game.elapsedSeconds}
           moveCount={game.moveCount}
+          mistakeCount={game.mistakeCount}
           isDaily={isDaily}
           onPlayAgain={() => onPlayAgain(game.difficulty, game.variant)}
           onBackToMenu={onBackToMenu}

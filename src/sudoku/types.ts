@@ -26,6 +26,7 @@ export interface GameState {
   notesMode: boolean;
   elapsedSeconds: number;
   moveCount: number;
+  mistakeCount: number;
   isComplete: boolean;
   startedAt: number;
 }

@@ -120,6 +120,12 @@ Statystyki **nie są** aktualizowane przez ukończenie wyzwania dnia — to celo
 
 „Ruch” to każde wstawienie lub usunięcie cyfry (nie licząc auto-usunięcia błędnej cyfry przy Podpowiedziach — patrz wyżej), oraz nie licząc przełączania notatek. Widoczny na żywo w nagłówku ekranu gry, w poprawnej polskiej odmianie (1 ruch / 2-4 ruchy / 5+ ruchów, z wyjątkiem 12-14).
 
+## Licznik błędów
+
+Każde wstawienie cyfry niezgodnej z rozwiązaniem liczy się jako błąd — **niezależnie od tego, czy Podpowiedzi są włączone czy wyłączone** (w obu trybach aplikacja wewnętrznie wie, czy cyfra jest poprawna, nawet gdy nic o tym nie pokazuje na żywo przy wyłączonych Podpowiedziach). Licznik jest trwały: nie cofa się przy auto-usunięciu błędnej cyfry (Podpowiedzi), przy „Wyczyść” ani przy „Cofnij” — to historyczna suma popełnionych błędów w danej grze, a nie liczba aktualnie widocznych błędów na planszy.
+
+W przeciwieństwie do licznika ruchów, **nie jest pokazywany na żywo** podczas gry — dopiero w dialogu po ukończeniu planszy („Poziom: X · Czas: Y · Ruchy: Z · N błędów”), żeby nie kusić do liczenia błędów w trakcie gry. Nie trafia też do statystyk na ekranie głównym — to świadoma decyzja, żeby nie rozbudowywać tam listy liczb per poziom trudności.
+
 ## Timer
 
 Odmierza czas od rozpoczęcia gry, zapisywany w stanie gry. **Pauzuje się**, gdy:
@@ -133,7 +139,7 @@ Dotyczy to niezależnie zwykłej gry i wyzwania dnia — każdy z timerów tyka 
 - Jedna plansza dziennie, zawsze na poziomie **Średni**, wariant klasyczny (bez wyboru trudności).
 - Plansza generowana jest **raz** dla danego dnia kalendarzowego (wg czasu lokalnego gracza, nie UTC) i zapamiętywana — ponowne wejście tego samego dnia wznawia tę samą planszę, nie losuje nowej.
 - Streak (passa dni z rzędu): rośnie o 1, jeśli gracz ukończył wyzwanie **wczoraj** i ukończa je dziś. Jeśli dzień został pominięty, streak resetuje się do 1 przy najbliższym ukończeniu. Zapamiętywany jest też rekord najdłuższej passy.
-- Ekran menu pokazuje przycisk „Wyzwanie dnia” zawsze (nie znika po ukończeniu — dostaje znacznik ✓), z aktualną passą lub zachętą do jej rozpoczęcia.
+- Ekran menu pokazuje przycisk „Wyzwanie dnia” zawsze (nie znika po ukończeniu — dostaje znacznik ✓), z aktualną (żywą) passą lub zachętą do jej rozpoczęcia, plus odznakę 🏆 z rekordem najdłuższej passy w rogu przycisku (widoczna dopiero po zdobyciu pierwszej passy).
 - Po ukończeniu wyzwania dnia dialog wygranej nie oferuje „Kolejna łamigłówka” (bo nie ma kolejnej tego dnia) — tylko powrót do menu, z komunikatem „Wróć jutro po nowe wyzwanie!”.
 
 ## PWA — instalacja i aktualizacje

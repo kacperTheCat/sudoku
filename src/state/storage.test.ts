@@ -67,6 +67,7 @@ function makeGame(overrides: Partial<GameState> = {}): GameState {
     notesMode: false,
     elapsedSeconds: 0,
     moveCount: 3,
+    mistakeCount: 1,
     isComplete: false,
     startedAt: 0,
     ...overrides,
@@ -89,6 +90,13 @@ describe('game persistence', () => {
     void moveCount;
     localStorage.setItem('sudoku:v1:game', JSON.stringify(legacy));
     expect(loadGame()?.moveCount).toBe(0);
+  });
+
+  it('defaults mistakeCount to 0 for saves from before it existed', () => {
+    const { mistakeCount, ...legacy } = makeGame();
+    void mistakeCount;
+    localStorage.setItem('sudoku:v1:game', JSON.stringify(legacy));
+    expect(loadGame()?.mistakeCount).toBe(0);
   });
 
   it('returns null for corrupted JSON instead of throwing', () => {
@@ -192,6 +200,13 @@ describe('daily challenge persistence', () => {
     void moveCount;
     localStorage.setItem('sudoku:v1:daily-game', JSON.stringify({ date: '2026-08-10', game: legacyGame }));
     expect(loadDailyGame()?.game.moveCount).toBe(0);
+  });
+
+  it('defaults mistakeCount to 0 for a legacy daily save', () => {
+    const { mistakeCount, ...legacyGame } = makeGame();
+    void mistakeCount;
+    localStorage.setItem('sudoku:v1:daily-game', JSON.stringify({ date: '2026-08-10', game: legacyGame }));
+    expect(loadDailyGame()?.game.mistakeCount).toBe(0);
   });
 
   it('returns null when the stored entry is missing date or game', () => {

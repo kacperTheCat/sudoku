@@ -29,6 +29,7 @@ function makeGame(overrides: Partial<GameState> = {}): GameState {
     notesMode: false,
     elapsedSeconds: 0,
     moveCount: 0,
+    mistakeCount: 0,
     isComplete: false,
     startedAt: 0,
     ...overrides,
@@ -116,6 +117,34 @@ describe('applyDigitPlacement', () => {
     const game = makeGame({ solution, values: almostDone });
     const next = applyDigitPlacement(game, 0, solution[0], PEERS);
     expect(next.isComplete).toBe(true);
+  });
+
+  it('does not count a correct placement as a mistake', () => {
+    const solution = solvedGrid();
+    const game = makeGame({ solution });
+    const next = applyDigitPlacement(game, 0, solution[0], PEERS);
+    expect(next.mistakeCount).toBe(0);
+  });
+
+  it('counts a wrong placement as a mistake', () => {
+    const solution = solvedGrid();
+    const wrongDigit = solution[0] === 9 ? 8 : solution[0] + 1;
+    const game = makeGame({ solution });
+    const next = applyDigitPlacement(game, 0, wrongDigit, PEERS);
+    expect(next.mistakeCount).toBe(1);
+  });
+
+  it('accumulates mistakes across multiple wrong placements, and never decrements on toggle-off', () => {
+    const solution = solvedGrid();
+    const wrongDigit = solution[0] === 9 ? 8 : solution[0] + 1;
+    let game = makeGame({ solution, mistakeCount: 2 });
+
+    game = applyDigitPlacement(game, 0, wrongDigit, PEERS); // 3rd mistake
+    expect(game.mistakeCount).toBe(3);
+
+    game = applyDigitPlacement(game, 0, wrongDigit, PEERS); // toggled back off
+    expect(game.values[0]).toBe(0);
+    expect(game.mistakeCount).toBe(3); // clearing a mistake doesn't un-count it
   });
 });
 

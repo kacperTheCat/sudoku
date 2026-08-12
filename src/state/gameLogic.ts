@@ -70,8 +70,13 @@ export function applyDigitPlacement(
 
   const history = [...game.history, { index, prevValue, prevNotes, clearedPeerNotes }];
   const isComplete = arraysEqual(values, game.solution);
+  // A mistake is recorded the moment a wrong digit is placed, permanently —
+  // like moveCount, it's a historical tally that undo/auto-clear doesn't
+  // reverse, not a live count of what's currently wrong on the board.
+  const isMistake = value !== 0 && value !== game.solution[index];
+  const mistakeCount = game.mistakeCount + (isMistake ? 1 : 0);
 
-  return { ...game, values, notes, history, moveCount: game.moveCount + 1, isComplete };
+  return { ...game, values, notes, history, moveCount: game.moveCount + 1, mistakeCount, isComplete };
 }
 
 /** Reconstructs the values/notes a history entry's cell (and its affected peers) had before it was recorded. */
