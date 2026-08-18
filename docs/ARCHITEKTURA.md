@@ -26,8 +26,9 @@ src/
   state/        — stan aplikacji i logika mutacji, bez JSX
     gameLogic.ts    współdzielone czyste funkcje mutujące GameState
     storage.ts      cały dostęp do localStorage (klucze, wersjonowanie, domyślne wartości)
-    useGame.ts       hook zwykłej gry — główny "mózg" aplikacji
-    useDailyChallenge.ts  równoległy hook wyzwania dnia
+    useGameSession.ts  współdzielony "mózg" jednej sesji gry (patrz niżej)
+    useGame.ts       hook zwykłej gry — owija useGameSession, dokłada generowanie/statystyki
+    useDailyChallenge.ts  równoległy hook wyzwania dnia — owija useGameSession, dokłada streak
   components/    — czyste komponenty prezentacyjne, stan i akcje wchodzą przez propsy
   pwa/          — hooki specyficzne dla PWA (instalacja, aktualizacje)
   App.tsx        — routing (menu/gra) i przełączanie między trybem zwykłym a wyzwaniem dnia
@@ -89,13 +90,21 @@ Cały dostęp do `localStorage` w jednym miejscu, klucze wersjonowane (`sudoku:v
 
 Każdy loader parsuje JSON i **scala z wartościami domyślnymi** (`{...defaults, ...parsed}`), żeby stare zapisy sprzed dodania nowego pola (np. `moveCount`, `bestSeconds`) nie psuły się na `undefined` zamiast dostać sensowną wartość domyślną. Dla `Stats` scalanie jest **per-poziom-trudności** (nie płytkie na całym obiekcie) — płytkie scalanie nadpisałoby całe `stats.easy` starym obiektem bez nowych pól, zamiast uzupełnić brakujące.
 
-### `useGame.ts` — hook zwykłej gry
+### `useGameSession.ts` — współdzielony "mózg" jednej sesji gry
 
-Przyjmuje `isActive: boolean` (czy ekran gry jest aktualnie widoczny w trybie zwykłym — patrz sekcja o `App.tsx` niżej) i zwraca cały stan + akcje potrzebne UI. Wewnętrzny stan: `game`, `settings`, `stats`, `isGenerating`, `pulseCells` (konflikt/odrzucenie), `rippleCells`, `exhaustedDigit`, `combo`. Każdy z efektów ubocznych (dźwięk/wibracja/animacja/pulse) ma własny `useRef` na timeout, czyszczony przy odmontowaniu i przy każdym nowym wyzwoleniu (żeby dwa szybkie wpisy z rzędu nie zostawiły dwóch nakładających się timerów).
+`useGame` i `useDailyChallenge` mają niemal identyczną logikę rozgrywki (wybór komórki, wstawianie cyfry ze wszystkimi efektami, gumka, cofnięcie, tryb notatek, zamiatanie Podpowiedzi, ticker czasu) — różni je tylko to, *skąd* bierze się `game`/`setGame` (własny `useState` + generowanie na żądanie vs. generowanie raz dziennie) i co się dzieje po ukończeniu planszy (statystyki vs. streak). `useGameSession` wydziela tę wspólną część: przyjmuje już **podniesiony** (lifted) stan `game`/`setGame`, `colorAssists`, `isActive` oraz callback `onComplete`, i zwraca `pulseCells`, `rippleCells`, `exhaustedDigit`, `combo` oraz akcje (`selectCell`, `setDigit`, `erase`, `toggleNotesMode`, `undo`, `clearIncorrectDigits`, `resetCombo`). `useGame`/`useDailyChallenge` wołają ten hook i doklejają do zwracanego obiektu własne pola (`newGame`+`stats` / `streak`+generowanie dzienne) — kształt zwracany przez oba hooki na zewnątrz (do `App.tsx`) jest identyczny jak przed wydzieleniem.
+
+Każdy z efektów ubocznych (dźwięk/wibracja/animacja/pulse) ma własny `useRef` na timeout, czyszczony przy odmontowaniu i przy każdym nowym wyzwoleniu (żeby dwa szybkie wpisy z rzędu nie zostawiły dwóch nakładających się timerów).
 
 Kluczowa, udokumentowana w kodzie decyzja: `setDigit` czyta `game` **z domknięcia** (closure), a nie przez funkcyjną formę `setGame(g => ...)`, mimo że to drugie jest "bezpieczniejsze" w Reakcie. Powód: React Strict Mode celowo podwójnie wywołuje funkcyjne aktualizatory w trybie deweloperskim, co podwoiłoby efekty uboczne (dźwięk, wibracja, aktualizacja statystyk) przy każdym ruchu. Czytanie z domknięcia gwarantuje, że te efekty odpalają się dokładnie raz na kliknięcie.
 
-`newGame` generuje planszę z 30ms opóźnieniem (żeby UI zdążyło pokazać stan ładowania przed synchronicznym, potencjalnie ~0.5s trwającym generowaniem).
+### Wzorzec `isActive`
+
+`useGameSession` przyjmuje flagę `isActive`, którą `useGame`/`useDailyChallenge` dostają jako parametr od wywołującego i przekazują dalej — samo `App.tsx` oblicza ją jako `view === 'game' && mode === '<odpowiedni tryb>'`. Ticker czasu (`setInterval` co sekundę, wewnątrz `useGameSession`) sprawdza tę flagę obok `game.isComplete` — bez tego czas rósłby w tle także wtedy, gdy gracz jest na ekranie menu, mimo że nie patrzy na tę konkretną grę.
+
+### `useGame.ts` — hook zwykłej gry
+
+Trzyma własny `game`/`settings`/`stats`/`isGenerating` w `useState`, woła `useGameSession` z tym stanem i z `onComplete` aktualizującym statystyki per poziom trudności. `newGame` generuje planszę z 30ms opóźnieniem (żeby UI zdążyło pokazać stan ładowania przed synchronicznym, potencjalnie ~0.5s trwającym generowaniem) i po wygenerowaniu woła `session.resetCombo()`.
 
 ### `useDailyChallenge.ts` — równoległy hook
 
@@ -103,13 +112,9 @@ Struktura lustrzana do `useGame`, ale:
 - Własny, osobny stan i klucze `localStorage` (patrz tabela wyżej) — całkowita izolacja od zwykłej gry.
 - Trudność i wariant są stałe (`DAILY_DIFFICULTY`, `'classic'`), generowanie wyzwala się automatycznie przy montowaniu (nie na żądanie gracza), ale **tylko jeśli** nic nie zostało wczytane dla dzisiejszej daty — w przeciwnym razie wznawia zapisaną planszę.
 - Przyjmuje `colorAssists: boolean` jako parametr (nie ma własnego ustawienia — Podpowiedzi to globalne ustawienie z `useGame`).
-- Dodatkowa logika streak przy ukończeniu (porównanie `lastCompletedDate` z wczorajszą datą).
+- Dodatkowa logika streak przy ukończeniu (porównanie `lastCompletedDate` z wczorajszą datą), przekazana do `useGameSession` jako `onComplete`.
 
-Cała logika mutacji komórek (`applyCellChange`, `applyDigitPlacement`, `revertHistoryEntry`, `clearIncorrectValues`) pochodzi z tego samego `gameLogic.ts` co `useGame` — **nie jest zduplikowana**, tylko owinięta w osobne `useState`/`useCallback` dla tego drugiego slotu zapisu.
-
-### Wzorzec `isActive`
-
-Zarówno `useGame`, jak i `useDailyChallenge` przyjmują flagę `isActive`, którą oblicza `App.tsx` jako `view === 'game' && mode === '<odpowiedni tryb>'`. Ticker czasu (`setInterval` co sekundę) sprawdza tę flagę obok `game.isComplete` — bez tego czas rósłby w tle także wtedy, gdy gracz jest na ekranie menu, mimo że nie patrzy na tę konkretną grę.
+Cała logika mutacji komórek (`applyCellChange`, `applyDigitPlacement`, `revertHistoryEntry`, `clearIncorrectValues`) pochodzi z tego samego `gameLogic.ts`, a cała logika rozgrywki — z tego samego `useGameSession` co `useGame` — **nie jest zduplikowana**, tylko owinięta w osobny `useState` dla tego drugiego slotu zapisu.
 
 ## `App.tsx` — routing i przełączanie trybów
 
