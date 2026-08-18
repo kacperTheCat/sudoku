@@ -126,6 +126,8 @@ Każde wstawienie cyfry niezgodnej z rozwiązaniem liczy się jako błąd — **
 
 W przeciwieństwie do licznika ruchów, **nie jest pokazywany na żywo** podczas gry — dopiero w dialogu po ukończeniu planszy („Poziom: X · Czas: Y · Ruchy: Z · N błędów”), żeby nie kusić do liczenia błędów w trakcie gry. Nie trafia też do statystyk na ekranie głównym — to świadoma decyzja, żeby nie rozbudowywać tam listy liczb per poziom trudności.
 
+Ukończenie planszy z **zerem błędów** (`mistakeCount === 0`) dodatkowo pokazuje w dialogu wygranej odznakę „🧠 Jesteś geniuszem!” — dotyczy to zarówno zwykłej gry, jak i wyzwania dnia, bez dodatkowego dźwięku (tylko wizualnie).
+
 ## Timer
 
 Odmierza czas od rozpoczęcia gry, zapisywany w stanie gry. **Pauzuje się**, gdy:
