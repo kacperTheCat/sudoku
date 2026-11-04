@@ -12,6 +12,12 @@ I built this for my friends. Many of them had free Sudoku apps installed that ma
 
 ## Demo
 
+<p align="center">
+  <img src="docs/screenshots/game.png" alt="Game screen: a medium puzzle in progress with notes, highlighted digits and a combo badge" width="280">
+  &nbsp;
+  <img src="docs/screenshots/menu.png" alt="Menu: daily challenge with a streak, difficulty levels and per-level stats" width="280">
+</p>
+
 Play it live in the browser:
 
 - **GitHub Pages:** https://kacperthecat.github.io/sudoku/
