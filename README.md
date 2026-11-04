@@ -58,3 +58,7 @@ The docs are written in Polish.
 
 - [`docs/LOGIKA_BIZNESOWA.md`](docs/LOGIKA_BIZNESOWA.md) — game rules and app behavior from the player's perspective.
 - [`docs/ARCHITEKTURA.md`](docs/ARCHITEKTURA.md) — code structure, patterns, technical decisions.
+
+## License
+
+[MIT](LICENSE)
