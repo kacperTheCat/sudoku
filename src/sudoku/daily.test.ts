@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { liveCurrentStreak, previousDateKey } from './daily';
+import { applyDailyCompletion, liveCurrentStreak, previousDateKey } from './daily';
 
 describe('previousDateKey', () => {
   it('steps back one day within a month', () => {
@@ -36,5 +36,44 @@ describe('liveCurrentStreak', () => {
 
   it('is 0 when nothing was ever completed', () => {
     expect(liveCurrentStreak(0, null, today)).toBe(0);
+  });
+});
+
+describe('applyDailyCompletion', () => {
+  const base = { currentStreak: 3, longestStreak: 4, lastCompletedDate: '2026-11-03' };
+
+  it('extends the streak when the previous day was completed', () => {
+    expect(applyDailyCompletion(base, '2026-11-04')).toEqual({
+      currentStreak: 4,
+      longestStreak: 4,
+      lastCompletedDate: '2026-11-04',
+    });
+  });
+
+  it('raises the record when the streak passes it', () => {
+    const next = applyDailyCompletion({ ...base, currentStreak: 4 }, '2026-11-04');
+    expect(next.longestStreak).toBe(5);
+  });
+
+  it('restarts at 1 after a missed day and keeps the record', () => {
+    expect(applyDailyCompletion(base, '2026-11-05')).toEqual({
+      currentStreak: 1,
+      longestStreak: 4,
+      lastCompletedDate: '2026-11-05',
+    });
+  });
+
+  it('ignores a second completion of the same day', () => {
+    const done = { ...base, lastCompletedDate: '2026-11-04' };
+    expect(applyDailyCompletion(done, '2026-11-04')).toBe(done);
+  });
+
+  it('starts the first streak at 1', () => {
+    const fresh = { currentStreak: 0, longestStreak: 0, lastCompletedDate: null };
+    expect(applyDailyCompletion(fresh, '2026-11-04')).toEqual({
+      currentStreak: 1,
+      longestStreak: 1,
+      lastCompletedDate: '2026-11-04',
+    });
   });
 });

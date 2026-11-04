@@ -25,8 +25,27 @@ export function previousDateKey(key: string): string {
   return dateKey(new Date(y, m - 1, d - 1));
 }
 
-export function yesterdayDateKey(): string {
-  return previousDateKey(todayDateKey());
+export interface StreakState {
+  currentStreak: number;
+  longestStreak: number;
+  lastCompletedDate: string | null;
+}
+
+/**
+ * Credits a completed daily puzzle to `puzzleDate`, the day the puzzle
+ * belongs to (not the wall clock at completion time). The streak grows only
+ * if the previous credited day is the day right before it; completing the
+ * same day twice changes nothing.
+ */
+export function applyDailyCompletion<T extends StreakState>(streak: T, puzzleDate: string): T {
+  if (streak.lastCompletedDate === puzzleDate) return streak;
+  const currentStreak = streak.lastCompletedDate === previousDateKey(puzzleDate) ? streak.currentStreak + 1 : 1;
+  return {
+    ...streak,
+    currentStreak,
+    longestStreak: Math.max(streak.longestStreak, currentStreak),
+    lastCompletedDate: puzzleDate,
+  };
 }
 
 /**

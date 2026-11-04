@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import type { GameState } from '../sudoku/types';
 import { generatePuzzle } from '../sudoku/generator';
-import { DAILY_DIFFICULTY, liveCurrentStreak, todayDateKey, yesterdayDateKey } from '../sudoku/daily';
+import { DAILY_DIFFICULTY, applyDailyCompletion, liveCurrentStreak, todayDateKey } from '../sudoku/daily';
 import {
   loadDailyGame,
   saveDailyGame,
@@ -20,38 +20,51 @@ import { useGameSession } from './useGameSession';
  * challenge never disturbs an in-progress regular game or vice versa.
  */
 export function useDailyChallenge(colorAssists: boolean, isActive: boolean) {
-  const [today] = useState(todayDateKey);
-  const [game, setGame] = useState<GameState | null>(() => {
+  // "Today" is re-read whenever the app comes back to the foreground: an
+  // installed PWA can sit suspended in the background overnight and resume
+  // with all its JS state intact, so a date captured once at mount would go
+  // stale and keep serving yesterday's puzzle.
+  const [today, setToday] = useState(todayDateKey);
+  const [initial] = useState(() => {
     const stored = loadDailyGame();
-    return stored && stored.date === today ? stored.game : null;
+    return stored && stored.date === today ? stored : null;
   });
-  const [isGenerating, setIsGenerating] = useState(() => game === null);
+  const [game, setGame] = useState<GameState | null>(initial?.game ?? null);
+  // The day the puzzle in `game` belongs to. Saving and streak credit use
+  // this, not `today`, so a puzzle is always filed under its own day.
+  const [gameDate, setGameDate] = useState<string | null>(initial?.date ?? null);
   const [streak, setStreak] = useState<DailyStreak>(() => loadDailyStreak());
 
-  // Streak tracking only needs today's date, not the completed game itself.
-  const handleComplete = useCallback(
-    (_next: GameState) => {
-      setStreak((s) => {
-        if (s.lastCompletedDate === today) return s;
-        const yesterday = yesterdayDateKey();
-        const currentStreak = s.lastCompletedDate === yesterday ? s.currentStreak + 1 : 1;
-        return {
-          currentStreak,
-          longestStreak: Math.max(s.longestStreak, currentStreak),
-          lastCompletedDate: today,
-        };
-      });
-    },
-    [today],
-  );
+  // True from mount until today's puzzle exists, and again right after the
+  // date rolls over until the new day's puzzle has been generated.
+  const needsPuzzle = gameDate !== today;
+
+  useEffect(() => {
+    const refreshDate = () => {
+      if (document.visibilityState === 'visible') setToday(todayDateKey());
+    };
+    document.addEventListener('visibilitychange', refreshDate);
+    window.addEventListener('focus', refreshDate);
+    return () => {
+      document.removeEventListener('visibilitychange', refreshDate);
+      window.removeEventListener('focus', refreshDate);
+    };
+  }, []);
+
+  const handleComplete = useCallback(() => {
+    if (gameDate === null) return;
+    setStreak((s) => applyDailyCompletion(s, gameDate));
+  }, [gameDate]);
 
   const session = useGameSession({ game, setGame, colorAssists, isActive, onComplete: handleComplete });
+  const { resetCombo } = session;
 
-  // Generates today's puzzle once, only if nothing usable was loaded for
-  // today's date above. Deferred like the regular newGame() so the
-  // "generating" UI can paint before the synchronous backtracking search.
+  // Generates the puzzle for `today` whenever the slot doesn't hold one yet:
+  // on first launch of the day, and after a date rollover. Deferred like the
+  // regular newGame() so the "generating" UI can paint before the
+  // synchronous backtracking search.
   useEffect(() => {
-    if (game !== null) return;
+    if (!needsPuzzle) return;
     const timer = window.setTimeout(() => {
       const { givens, solution } = generatePuzzle(DAILY_DIFFICULTY, 'classic');
       const fresh: GameState = {
@@ -71,19 +84,15 @@ export function useDailyChallenge(colorAssists: boolean, isActive: boolean) {
         startedAt: Date.now(),
       };
       setGame(fresh);
-      setIsGenerating(false);
-      session.resetCombo();
+      setGameDate(today);
+      resetCombo();
     }, 30);
     return () => window.clearTimeout(timer);
-    // Deliberately runs once on mount only, not on every `game` change —
-    // it's a one-time "generate if nothing usable was loaded" check, not a
-    // reactive sync. session.resetCombo is a stable reference regardless
-    // (its own useCallback inside useGameSession has no deps).
-  }, []);
+  }, [needsPuzzle, today, resetCombo]);
 
   useEffect(() => {
-    if (game) saveDailyGame({ date: today, game });
-  }, [game, today]);
+    if (game && gameDate) saveDailyGame({ date: gameDate, game });
+  }, [game, gameDate]);
 
   useEffect(() => {
     saveDailyStreak(streak);
@@ -98,9 +107,12 @@ export function useDailyChallenge(colorAssists: boolean, isActive: boolean) {
   );
 
   return {
-    game,
-    isGenerating,
-    streak: displayedStreak,
     ...session,
+    // A previous day's board is never exposed: while the new day's puzzle is
+    // being generated the screen shows the loading state and the menu no
+    // longer marks the challenge as done.
+    game: needsPuzzle ? null : game,
+    isGenerating: needsPuzzle,
+    streak: displayedStreak,
   };
 }

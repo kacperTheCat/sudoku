@@ -110,9 +110,10 @@ Trzyma własny `game`/`settings`/`stats`/`isGenerating` w `useState`, woła `use
 
 Struktura lustrzana do `useGame`, ale:
 - Własny, osobny stan i klucze `localStorage` (patrz tabela wyżej) — całkowita izolacja od zwykłej gry.
-- Trudność i wariant są stałe (`DAILY_DIFFICULTY`, `'classic'`), generowanie wyzwala się automatycznie przy montowaniu (nie na żądanie gracza), ale **tylko jeśli** nic nie zostało wczytane dla dzisiejszej daty — w przeciwnym razie wznawia zapisaną planszę.
+- Trudność i wariant są stałe (`DAILY_DIFFICULTY`, `'classic'`). Hook trzyma `today` i `gameDate` (dzień, do którego należy plansza w `game`). `today` jest odczytywane ponownie przy `visibilitychange` i `focus`, bo PWA potrafi wznowić się z tła po północy z nietkniętym stanem JS. Gdy `gameDate !== today` (pierwsze uruchomienie danego dnia albo zmiana daty), efekt generuje nową planszę. W tym czasie hook zwraca `game: null` i `isGenerating: true`, więc ekran i menu nigdy nie pokazują planszy z poprzedniego dnia.
+- Zapis do `localStorage` i zaliczenie passy używają `gameDate`, nie `today`.
 - Przyjmuje `colorAssists: boolean` jako parametr (nie ma własnego ustawienia — Podpowiedzi to globalne ustawienie z `useGame`).
-- Dodatkowa logika streak przy ukończeniu (porównanie `lastCompletedDate` z wczorajszą datą), przekazana do `useGameSession` jako `onComplete`.
+- Logika passy przy ukończeniu to czysta funkcja `applyDailyCompletion(streak, gameDate)` z `sudoku/daily.ts` (porównanie `lastCompletedDate` z dniem poprzedzającym `gameDate`), wołana w `onComplete` przekazanym do `useGameSession`.
 - Zwracany `streak` ma `currentStreak` przeliczone przez `liveCurrentStreak` (`sudoku/daily.ts`). W `localStorage` passa resetuje się dopiero przy następnym ukończeniu, więc surowa wartość po opuszczonym dniu byłaby nieaktualna.
 
 Cała logika mutacji komórek (`applyCellChange`, `applyDigitPlacement`, `revertHistoryEntry`, `clearIncorrectValues`) pochodzi z tego samego `gameLogic.ts`, a cała logika rozgrywki — z tego samego `useGameSession` co `useGame` — **nie jest zduplikowana**, tylko owinięta w osobny `useState` dla tego drugiego slotu zapisu.
