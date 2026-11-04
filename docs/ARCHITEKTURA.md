@@ -126,7 +126,7 @@ Dwa niezależne wymiary stanu nawigacji:
 
 `isDaily = mode === 'daily'`, a `GameScreen` dostaje propsy warunkowo: `isDaily ? daily.X : X` dla każdego kawałka stanu/akcji. To jedyne miejsce, gdzie te dwa równoległe hooki się „stykają” — same komponenty (`Board`, `NumberPad`, `WinDialog`...) nie wiedzą, z którego trybu pochodzą dane.
 
-`view`'s początkowa wartość czyta `loadGame()` **bezpośrednio** ze `storage.ts`, a nie z wyniku `useGame()` — musi być obliczona *przed* wywołaniem `useGame(isActive)`, bo `isActive` zależy od `view`. Gdyby `view` czekał na `game` z hooka, powstałaby zależność cykliczna (hook potrzebuje `isActive`, `isActive` potrzebuje `view`, `view` chciałby czytać `game` z hooka).
+Początkowa wartość `view` czyta `loadGame()` **bezpośrednio** ze `storage.ts`, a nie z wyniku `useGame()` — musi być obliczona *przed* wywołaniem `useGame(isActive)`, bo `isActive` zależy od `view`. Gdyby `view` czekał na `game` z hooka, powstałaby zależność cykliczna (hook potrzebuje `isActive`, `isActive` potrzebuje `view`, `view` chciałby czytać `game` z hooka). Ekran gry jest wybierany tylko dla zapisanej gry, która nie jest ukończona (`!saved.isComplete`), tak samo jak przycisk „Kontynuuj grę” w menu.
 
 Delegowany, pojedynczy `document`-owy listener kliknięć nadaje każdemu przyciskowi w aplikacji dźwięk „stuku” + lekką wibrację, bez wpinania tego osobno w każdy handler. Atrybuty `data-skip-click-sound` (przyciski z własnym, semantycznym dźwiękiem, np. cyfry przy włączonych Podpowiedziach) i `data-sound="transition"` (przyciski zmieniające ekran) sterują, który dźwięk (jeśli w ogóle) się odpala.
 

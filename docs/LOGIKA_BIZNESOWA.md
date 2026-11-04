@@ -11,6 +11,8 @@ Sudoku jako PWA (Progressive Web App): SPA z ekranem menu i ekranem gry, zapis s
 
 Oba tryby są całkowicie od siebie niezależne: osobny zapisany stan, osobna historia ruchów, osobne liczniki. Rozpoczęcie/kontynuowanie jednego nie wpływa na drugi.
 
+Po uruchomieniu aplikacja od razu wraca do nieukończonej zwykłej gry. Jeśli zapisana gra jest już ukończona (albo nie ma żadnej), startuje od menu, żeby nie pokazywać ponownie dialogu wygranej.
+
 ## Generowanie planszy
 
 - Generator tworzy najpierw w pełni wypełnioną, poprawną planszę (losowy backtracking z heurystyką MRV — zawsze rozwija komórkę o najmniejszej liczbie możliwych kandydatów), a następnie usuwa cyfry, sprawdzając po każdym usunięciu, czy plansza nadal ma **dokładnie jedno** rozwiązanie. Jeśli usunięcie złamałoby unikalność, cyfra wraca na miejsce.

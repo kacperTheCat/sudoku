@@ -16,7 +16,13 @@ type View = 'menu' | 'game';
 type Mode = 'normal' | 'daily';
 
 function App() {
-  const [view, setView] = useState<View>(() => (loadGame() ? 'game' : 'menu'));
+  // Resume straight into an unfinished game. A finished one would only
+  // reopen its win dialog, so it starts on the menu instead (the same rule
+  // as the menu's "Kontynuuj grę" button).
+  const [view, setView] = useState<View>(() => {
+    const saved = loadGame();
+    return saved && !saved.isComplete ? 'game' : 'menu';
+  });
   const [mode, setMode] = useState<Mode>('normal');
 
   const {
