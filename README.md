@@ -1,12 +1,12 @@
 # Sudoku
 
-Gra w sudoku jako PWA (SPA, zapis stanu w `localStorage`, instalowalna na ekranie głównym).
+A Sudoku game built as a PWA (SPA, game state saved in `localStorage`, installable on the home screen).
 
-- Generator plansz z gwarantowanym jednym rozwiązaniem (backtracking + kontrola unikalności), 4 poziomy trudności.
-- Ekran generowania gry i ekran gry (notatki/pencil marks, podświetlanie, cofanie, licznik pozostałych cyfr, opcjonalne podpowiedzi kolorystyczne, dźwięki).
-- Zapisany stan pozwala wrócić do rozpoczętej gry po zamknięciu przeglądarki/aplikacji.
+- Puzzle generator with a guaranteed unique solution (backtracking + uniqueness check), 4 difficulty levels.
+- A new-game screen and a game screen (notes/pencil marks, highlighting, undo, remaining-digit counters, optional color hints, sounds).
+- The saved state lets you resume an unfinished game after closing the browser/app.
 
-## Rozwój
+## Development
 
 ```bash
 npm install
@@ -20,20 +20,22 @@ npm run build
 npm run preview
 ```
 
-## Testy
+## Tests
 
 ```bash
-npm run test        # jednorazowo
-npm run test:watch  # tryb watch
+npm run test        # single run
+npm run test:watch  # watch mode
 ```
 
-Testy jednostkowe (Vitest) pokrywają czystą logikę: generator/solver sudoku, mutacje stanu gry, animacje fal i persystencję w `localStorage` — bez testów komponentów React.
+Unit tests (Vitest) cover the pure logic: the Sudoku generator/solver, game state mutations, ripple animations and `localStorage` persistence. There are no React component tests.
 
 ## Deploy
 
-Push na branch `main` uruchamia `.github/workflows/deploy.yml`, który buduje projekt i publikuje go na GitHub Pages (wymaga włączenia w ustawieniach repo: **Settings → Pages → Source: GitHub Actions**). Równolegle podłączony jest Vercel (przez UI Vercela).
+A push to the `main` branch triggers `.github/workflows/deploy.yml`, which builds the project and publishes it to GitHub Pages (requires enabling it in the repo settings: **Settings → Pages → Source: GitHub Actions**). Vercel is connected in parallel (through the Vercel UI).
 
-## Dokumentacja
+## Documentation
 
-- [`docs/LOGIKA_BIZNESOWA.md`](docs/LOGIKA_BIZNESOWA.md) — zasady gry i zachowanie aplikacji z perspektywy gracza.
-- [`docs/ARCHITEKTURA.md`](docs/ARCHITEKTURA.md) — struktura kodu, wzorce, decyzje techniczne.
+The docs are written in Polish.
+
+- [`docs/LOGIKA_BIZNESOWA.md`](docs/LOGIKA_BIZNESOWA.md) — game rules and app behavior from the player's perspective.
+- [`docs/ARCHITEKTURA.md`](docs/ARCHITEKTURA.md) — code structure, patterns, technical decisions.
