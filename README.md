@@ -6,6 +6,15 @@ A Sudoku game built as a PWA (SPA, game state saved in `localStorage`, installab
 - A new-game screen and a game screen (notes/pencil marks, highlighting, undo, remaining-digit counters, optional color hints, sounds).
 - The saved state lets you resume an unfinished game after closing the browser/app.
 
+## Demo
+
+Play it live in the browser:
+
+- **GitHub Pages:** https://kacperthecat.github.io/sudoku/
+- **Vercel:** https://sudoku-eta-navy.vercel.app
+
+Open either link on your phone and use *Add to Home Screen* to install it as an app. It works offline once loaded.
+
 ## Development
 
 ```bash
