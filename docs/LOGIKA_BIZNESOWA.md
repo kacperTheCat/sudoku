@@ -141,6 +141,7 @@ Dotyczy to niezależnie zwykłej gry i wyzwania dnia — każdy z timerów tyka 
 - Jedna plansza dziennie, zawsze na poziomie **Średni**, wariant klasyczny (bez wyboru trudności).
 - Plansza generowana jest **raz** dla danego dnia kalendarzowego (wg czasu lokalnego gracza, nie UTC) i zapamiętywana — ponowne wejście tego samego dnia wznawia tę samą planszę, nie losuje nowej.
 - Streak (passa dni z rzędu): rośnie o 1, jeśli gracz ukończył wyzwanie **wczoraj** i ukończa je dziś. Jeśli dzień został pominięty, streak resetuje się do 1 przy najbliższym ukończeniu. Zapamiętywany jest też rekord najdłuższej passy.
+- Passa pokazywana w menu jest liczona na bieżąco: jest żywa, jeśli ostatnie ukończenie było dziś albo wczoraj (dzisiejsze wyzwanie wciąż może ją przedłużyć). Jeśli gracz opuścił dzień, menu od razu pokazuje zachętę do rozpoczęcia nowej passy, a nie starą, już przerwaną wartość. Rekord 🏆 się nie zmienia.
 - Ekran menu pokazuje przycisk „Wyzwanie dnia” zawsze (nie znika po ukończeniu — dostaje znacznik ✓), z aktualną (żywą) passą lub zachętą do jej rozpoczęcia, plus odznakę 🏆 z rekordem najdłuższej passy w rogu przycisku (widoczna dopiero po zdobyciu pierwszej passy).
 - Po ukończeniu wyzwania dnia dialog wygranej nie oferuje „Kolejna łamigłówka” (bo nie ma kolejnej tego dnia) — tylko powrót do menu, z komunikatem „Wróć jutro po nowe wyzwanie!”.
 

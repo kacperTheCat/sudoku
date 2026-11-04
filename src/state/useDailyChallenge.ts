@@ -1,7 +1,7 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import type { GameState } from '../sudoku/types';
 import { generatePuzzle } from '../sudoku/generator';
-import { DAILY_DIFFICULTY, todayDateKey, yesterdayDateKey } from '../sudoku/daily';
+import { DAILY_DIFFICULTY, liveCurrentStreak, todayDateKey, yesterdayDateKey } from '../sudoku/daily';
 import {
   loadDailyGame,
   saveDailyGame,
@@ -89,10 +89,18 @@ export function useDailyChallenge(colorAssists: boolean, isActive: boolean) {
     saveDailyStreak(streak);
   }, [streak]);
 
+  // What the menu shows: the stored streak is only reset on the next
+  // completion, so after a missed day it would otherwise keep displaying a
+  // streak that is already broken.
+  const displayedStreak = useMemo<DailyStreak>(
+    () => ({ ...streak, currentStreak: liveCurrentStreak(streak.currentStreak, streak.lastCompletedDate, today) }),
+    [streak, today],
+  );
+
   return {
     game,
     isGenerating,
-    streak,
+    streak: displayedStreak,
     ...session,
   };
 }

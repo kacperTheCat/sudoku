@@ -113,6 +113,7 @@ Struktura lustrzana do `useGame`, ale:
 - Trudność i wariant są stałe (`DAILY_DIFFICULTY`, `'classic'`), generowanie wyzwala się automatycznie przy montowaniu (nie na żądanie gracza), ale **tylko jeśli** nic nie zostało wczytane dla dzisiejszej daty — w przeciwnym razie wznawia zapisaną planszę.
 - Przyjmuje `colorAssists: boolean` jako parametr (nie ma własnego ustawienia — Podpowiedzi to globalne ustawienie z `useGame`).
 - Dodatkowa logika streak przy ukończeniu (porównanie `lastCompletedDate` z wczorajszą datą), przekazana do `useGameSession` jako `onComplete`.
+- Zwracany `streak` ma `currentStreak` przeliczone przez `liveCurrentStreak` (`sudoku/daily.ts`). W `localStorage` passa resetuje się dopiero przy następnym ukończeniu, więc surowa wartość po opuszczonym dniu byłaby nieaktualna.
 
 Cała logika mutacji komórek (`applyCellChange`, `applyDigitPlacement`, `revertHistoryEntry`, `clearIncorrectValues`) pochodzi z tego samego `gameLogic.ts`, a cała logika rozgrywki — z tego samego `useGameSession` co `useGame` — **nie jest zduplikowana**, tylko owinięta w osobny `useState` dla tego drugiego slotu zapisu.
 
