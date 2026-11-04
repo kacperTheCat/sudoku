@@ -6,6 +6,10 @@ A Sudoku game built as a PWA (SPA, game state saved in `localStorage`, installab
 - A new-game screen and a game screen (notes/pencil marks, highlighting, undo, remaining-digit counters, optional color hints, sounds).
 - The saved state lets you resume an unfinished game after closing the browser/app.
 
+## Why this exists
+
+I built this for my friends. Many of them had free Sudoku apps installed that made money by selling their data. This is a simple alternative: no ads, no accounts, no analytics and no trackers. The app makes no network requests of its own. Your games and stats stay in your browser's `localStorage` on your device and never leave it.
+
 ## Demo
 
 Play it live in the browser:
